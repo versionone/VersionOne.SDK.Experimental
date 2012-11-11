@@ -262,7 +262,7 @@ var v1data = $("#data").text();
 
 var obj = JSON.parse(v1data);
 
-var userName = obj.Data.Username; // or even, crazily: this['obj']["Data"]['Username'];
+var userName = obj.Data.Username; // or even, crazily: obj.["Data"]['Username'];
 var roleName = obj.Data["DefaultRole.Name"];
 
 $("#output").html("Hello " + userName
