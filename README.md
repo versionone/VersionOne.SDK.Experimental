@@ -10,6 +10,9 @@ will make your jobs, as developers and users, easier and more productive. If you
 
 # What's inside
 
+* C# based plugins
+* Python (IronPython) plugins
+
 ## ApiInputTranslatorPlugins
 
 When ready, these assemblies will plug-in to the main VersionOne core application to provide support for processing other types of data than just XML passed to the API.
@@ -271,3 +274,120 @@ $("#output").html("Hello " + userName
 ```
 
 This, like the rest of this experimental repository, is under active development and we welcome your feedback and contributions!
+
+## Python plugins
+
+We're also incorporating support for Python-based plugins via the [IronPython](http://ironpython.net/) dynamic language. 
+
+Here's an example of a Python class that implements the .NET `ITranslateApiInputToAssetXml` interface, just like the C# code does:
+
+```python
+import clr
+clr.AddReference('VersionOne.Web.Plugins.Interfaces')
+clr.AddReference('System.Xml')
+clr.AddReference('System')
+
+from VersionOne.Web.Plugins.Api import (
+    ITranslateApiInputToAssetXml
+)
+from System.Xml.XPath import (
+    XPathDocument
+)
+from System.IO import (
+    StringReader
+)
+
+class TranslateYamlInputToAssetXml (ITranslateApiInputToAssetXml):
+    def CanTranslate(self, contentType):        
+        return contentType.lower() in map(str.lower, ['text/yaml', 'application/yaml', 'yaml'])
+    
+    def Execute(self, input):
+        output = '<Asset><Attribute name="Name" act="set">' + input + '</Attribute></Asset>'
+        reader = StringReader(output)
+        doc = XPathDocument(reader)
+        return doc
+```
+
+Here's what we have so far to test this:
+
+```C#
+namespace VersionOne.Web.Plugins.Python.Tests
+{
+    public static class PythonPluginLoader
+    {
+        public static IEnumerable<T> LoadPlugins<T>(string path)
+        {
+            var engine = IronPython.Hosting.Python.CreateEngine();
+            var script = engine.CreateScriptSourceFromFile(path);
+            var code = script.Compile();
+            var scope = engine.CreateScope();
+            code.Execute(scope);
+
+            var instances = (from obj in scope.GetItems().Where(kvp => kvp.Value is PythonType)
+                    let value = obj.Value
+                    where 
+                        obj.Key != typeof (T).Name 
+                        &&  PythonOps.IsSubClass(value, 
+                            DynamicHelpers.GetPythonTypeFromType(typeof (T)))
+                    select (T) value()).ToList();
+            
+            return instances;
+        }
+    }
+
+    [TestFixture]
+    public class PythonPluginLoaderTests
+    {
+        private ITranslateApiInputToAssetXml _subject;
+
+        [TestFixtureSetUp]
+        public void Setup()
+        {
+            var path = GetScriptPath();
+
+            var plugins = PythonPluginLoader.LoadPlugins<ITranslateApiInputToAssetXml>(path).ToList();
+
+            Assert.AreEqual(1, plugins.Count);
+
+            _subject = plugins[0];
+        }
+
+        private static string GetScriptPath()
+        {
+            var path = System.Reflection.Assembly.GetExecutingAssembly().EscapedCodeBase;
+            path = path.Substring(0, path.LastIndexOf("/") + 1);
+            path = path.Substring(path.IndexOf("C:"));
+
+            path += "VersionOne.Web.Plugins.Python.py";
+            return path;
+        }
+
+        [TestCase("text/xml", false)]
+        [TestCase("text/yaml", true)]
+        [TestCase("yaml", true)]
+        [TestCase("application/yaml", true)]
+        [TestCase("AppLiCAtioN/yAMl", true)]
+        [TestCase("", false)]
+        //[TestCase(null, false)]
+        public void CanProcess_correct_content_types(string contentType, bool expected)
+        {
+            var actual = _subject.CanTranslate(contentType);
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void Execute_returns_correctly()
+        {
+            var input = "Testing Now";
+            var expected =
+@"<Asset>
+  <Attribute name=""Name"" act=""set"">" + input + @"</Attribute>
+</Asset>";
+
+            var actual = _subject.Execute(input).CreateNavigator().OuterXml;
+
+            Assert.AreEqual(expected, actual);
+        }
+    }
+}
+```
