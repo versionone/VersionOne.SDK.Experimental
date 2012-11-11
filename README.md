@@ -252,7 +252,7 @@ This slimmed JSON will be produced:
   }
 }
 ```
-Are you worried about the `DefaultRole.Name` and others? Fortunately, in JavaScript, you can access all object properties. By string name with array brackets.
+Are you worried about the `DefaultRole.Name` and others? Fortunately, in JavaScript, you can access all object properties by string name with array brackets.
 
 Try out [this JSFiddle example](http://jsfiddle.net/UytTn/) that demonstrates the code below:
 
@@ -262,7 +262,7 @@ var v1data = $("#data").text();
 
 var obj = JSON.parse(v1data);
 
-var userName = obj.Data.Username;
+var userName = obj.Data.Username; // or even, crazily: this['obj']["Data"]['Username'];
 var roleName = obj.Data["DefaultRole.Name"];
 
 $("#output").html("Hello " + userName
