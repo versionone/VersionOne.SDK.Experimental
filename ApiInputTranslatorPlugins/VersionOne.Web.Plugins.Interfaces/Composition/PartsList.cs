@@ -12,14 +12,14 @@ namespace VersionOne.Web.Plugins.Composition
         public IEnumerable<TTypeToPopulateWith> Items { get; set; }
 #pragma warning restore 649
 
-        public PartsList()
+        public PartsList(string path)
         {
-            new PartsAssembler().ComposeParts(this);
+            new PartsAssembler(path).ComposeParts(this);
         }
 
-        public PartsList(Action<TTypeToPopulateWith> initializeAction)
+        public PartsList(Action<TTypeToPopulateWith> initializeAction, string path)
         {
-            new PartsAssembler().ComposeParts(this);
+            new PartsAssembler(path).ComposeParts(this);
 
             foreach (var item in Items)
             {

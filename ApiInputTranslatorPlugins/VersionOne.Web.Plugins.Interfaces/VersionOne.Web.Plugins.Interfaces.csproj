@@ -41,11 +41,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Api\IApiInputStreamTranslator.cs" />
-    <Compile Include="Api\ITranslateAssetXml.cs" />
+    <Compile Include="Api\ITranslateApiInputToAssetXml.cs" />
+    <Compile Include="Api\ITranslateAssetXmlToContentType.cs" />
     <Compile Include="Composition\PartsAssembler.cs" />
     <Compile Include="Composition\PartsList.cs" />
-    <Compile Include="Composition\PathProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

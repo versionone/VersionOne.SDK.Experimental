@@ -5,16 +5,22 @@ using VersionOne.Web.Plugins.Api;
 namespace VersionOne.Web.Plugins.Tests.Api
 {
     [TestFixture]
-    public class JsonInputStreamToAssetTranslatorTests
+    public class TranslateJsonInputToAssetXmlTests
     {
-        private JsonInputStreamToAssetXmlTranslator _subject;
+        private TranslateJsonInputToAssetXml _subject;
 
-        private readonly NameValueCollection _queryString = new NameValueCollection();
-
-        [TestFixtureSetUp]
-        public void Setup()
+        [TestCase("json", true)]
+        [TestCase("    json", true)]
+        [TestCase("text/json   ", true)]
+        [TestCase("  application/json ", true)]
+        [TestCase("", false)]
+        [TestCase(null, false)]
+        [TestCase("text/xml", false)]
+        public void CanProcess_supports_correct_content_types(string contentType, bool expected)
         {
-            _queryString.Add("format", "json");    
+            _subject = new TranslateJsonInputToAssetXml();
+
+            Assert.AreEqual(expected, _subject.CanTranslate(contentType), "Content-Type:" + contentType);
         }
 
         [Test]
@@ -30,9 +36,9 @@ namespace VersionOne.Web.Plugins.Tests.Api
   <Attribute name=""Name"" act=""set"">Josh</Attribute>
 </Asset>";
 
-            _subject = new JsonInputStreamToAssetXmlTranslator(input, _queryString);
+            _subject = new TranslateJsonInputToAssetXml();
 
-            var actual = _subject.Execute().CreateNavigator().OuterXml;
+            var actual = _subject.Execute(input).CreateNavigator().OuterXml;
 
             Assert.AreEqual(expected, actual);
         }
@@ -53,9 +59,9 @@ namespace VersionOne.Web.Plugins.Tests.Api
   <Attribute name=""Info"" act=""add"">newvalue</Attribute>
 </Asset>";
 
-            _subject = new JsonInputStreamToAssetXmlTranslator(input, _queryString);
+            _subject = new TranslateJsonInputToAssetXml();
 
-            var actual = _subject.Execute().CreateNavigator().OuterXml;
+            var actual = _subject.Execute(input).CreateNavigator().OuterXml;
 
             Assert.AreEqual(expected, actual);
         }

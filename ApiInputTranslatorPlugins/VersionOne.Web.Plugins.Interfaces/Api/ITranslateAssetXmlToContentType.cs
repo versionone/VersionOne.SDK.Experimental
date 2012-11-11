@@ -1,6 +1,6 @@
 ﻿namespace VersionOne.Web.Plugins.Api
 {
-    public interface ITranslateAssetXml
+    public interface ITranslateAssetXmlToContentType
     {
         string Execute(string input);
     }

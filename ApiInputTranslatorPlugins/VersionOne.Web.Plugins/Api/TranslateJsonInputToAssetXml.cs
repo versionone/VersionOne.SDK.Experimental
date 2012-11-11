@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
@@ -11,47 +10,27 @@ using Newtonsoft.Json.Linq;
 
 namespace VersionOne.Web.Plugins.Api
 {
-    [Export(typeof(IApiInputStreamTranslator))]
-    public class JsonInputStreamToAssetXmlTranslator : IApiInputStreamTranslator
+    [Export(typeof(ITranslateApiInputToAssetXml))]
+    public class TranslateJsonInputToAssetXml : ITranslateApiInputToAssetXml
     {
-        private string _inputData;
-        private NameValueCollection _queryString;
-
-        [ImportingConstructor]
-        public JsonInputStreamToAssetXmlTranslator()
+        public XPathDocument Execute(string input)
         {
-        }
+            var jsonObject = (JObject)JsonConvert.DeserializeObject(input);
+            var buffer = new StringBuilder();
 
-        public JsonInputStreamToAssetXmlTranslator(string inputData, NameValueCollection queryString)
-        {
-           Initialize(inputData, queryString);
-        }
-
-        public XPathDocument Execute()
-        {
-            XPathDocument doc = null;
-
-            if (IsInputStreamJson())
+            foreach (var item in jsonObject.Root)
             {
-                var jsonObject = (JObject)JsonConvert.DeserializeObject(_inputData);
-                var buffer = new StringBuilder();
-
-                foreach (var item in jsonObject.Root)
+                if (item.First.Type == JTokenType.String)
                 {
-                    if (item.First.Type == JTokenType.String)
-                    {
-                        AddAssetAttributeFromJValueString(item, buffer);
-                    }
-                    else if (item.First.Type == JTokenType.Array)
-                    {
-                        AddAttributeFromJArray(item, buffer);
-                    }
+                    AddAssetAttributeFromJValueString(item, buffer);
                 }
-
-                return CreateUpdateAssetXmlFragment(buffer);
+                else if (item.First.Type == JTokenType.Array)
+                {
+                    AddAttributeFromJArray(item, buffer);
+                }
             }
 
-            return doc;
+            return CreateUpdateAssetXmlFragment(buffer);
         }
 
         private static XPathDocument CreateUpdateAssetXmlFragment(StringBuilder buffer)
@@ -65,12 +44,6 @@ namespace VersionOne.Web.Plugins.Api
                 var doc = new XPathDocument(stringReader);
                 return doc;
             }
-        }
-
-        private bool IsInputStreamJson()
-        {
-            var format = _queryString["fmt"] ?? _queryString["format"];
-            return format != null && format.Equals("json", StringComparison.OrdinalIgnoreCase);
         }
 
         private static string CreateAssetAttributeForUpdateOrAdd(IList<string> attributeDef)
@@ -106,20 +79,32 @@ namespace VersionOne.Web.Plugins.Api
             if (new []{"set", "add"}.Any(a => a.Equals(act, StringComparison.OrdinalIgnoreCase)))
             {
                 var value = array[1].Value<string>();
-                attribute = CreateAssetAttributeForUpdateOrAdd(new string[] { name, act, value });
+                attribute = CreateAssetAttributeForUpdateOrAdd(new [] { name, act, value });
             }
             else if (act.Equals("remove", StringComparison.OrdinalIgnoreCase))
             {
-                attribute = CreateAssetAttributeForRemove(new string[] { name, act });
+                attribute = CreateAssetAttributeForRemove(new [] { name, act });
             }
             
             buffer.Append(attribute);
         }
-        
-        public void Initialize(string inputData, NameValueCollection queryString)
+
+        private static readonly string[] ContentTypes = new []
+            {
+                "json",
+                "text/json",
+                "application/json"
+            };
+
+        public bool CanTranslate(string contentType)
         {
-            _inputData = inputData;
-            _queryString = queryString;
+            if (!string.IsNullOrWhiteSpace(contentType))
+            {
+                contentType = contentType.Trim();
+                return ContentTypes.Any(c => c.Equals(contentType, StringComparison.OrdinalIgnoreCase));
+            }
+
+            return false;
         }
     }
 }
