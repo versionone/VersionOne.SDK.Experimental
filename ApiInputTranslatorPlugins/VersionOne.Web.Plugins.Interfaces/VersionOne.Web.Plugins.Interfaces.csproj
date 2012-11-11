@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Api\IApiInputStreamTranslator.cs" />
+    <Compile Include="Api\ITranslateAssetXml.cs" />
     <Compile Include="Composition\PartsAssembler.cs" />
     <Compile Include="Composition\PartsList.cs" />
     <Compile Include="Composition\PathProvider.cs" />
