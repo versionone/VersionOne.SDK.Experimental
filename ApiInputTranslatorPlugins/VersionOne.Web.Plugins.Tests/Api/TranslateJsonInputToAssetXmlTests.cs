@@ -1,5 +1,4 @@
-﻿using System.Collections.Specialized;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using VersionOne.Web.Plugins.Api;
 
 namespace VersionOne.Web.Plugins.Tests.Api
@@ -7,6 +6,7 @@ namespace VersionOne.Web.Plugins.Tests.Api
     [TestFixture]
     public class TranslateJsonInputToAssetXmlTests
     {
+
         private TranslateJsonInputToAssetXml _subject;
 
         [TestCase("json", true)]
@@ -26,12 +26,12 @@ namespace VersionOne.Web.Plugins.Tests.Api
         [Test]
         public void single_attribute_update_creates_set_as_default_action()
         {
-            const string input = 
+            const string input =
 @"
 { ""Name"" : ""Josh"" }
 ";
 
-            const string expected = 
+            const string expected =
 @"<Asset>
   <Attribute name=""Name"" act=""set"">Josh</Attribute>
 </Asset>";
