@@ -128,3 +128,99 @@ When successful, you should see results like this:
         <Attribute name="Phone">555</Attribute>
 </Asset>
 ```
+### Notes on JSON output
+
+Currently, you can request that the output you get back is JSON, by appending **`?accept=text/json`** to the end of the query URL:
+
+`http://localhost/versionone.web/rest-1.v1/Data/Member/20?accept=text/json`
+
+However, this produces very verbose JSON, similar to XML:
+
+```json
+{
+  "_type" : "Asset",
+  "href" : "/versionone.web/rest-1.v1/Data/Member/20",
+  "id" : "Member:20",
+  "Attributes" : {
+    "SecurityScope.Name" : {
+      "_type" : "Attribute",
+      "name" : "SecurityScope.Name",
+      "value" : null
+    },
+    "Description" : {
+      "_type" : "Attribute",
+      "name" : "Description",
+      "value" : null
+    },
+    "Nickname" : {
+      "_type" : "Attribute",
+      "name" : "Nickname",
+      "value" : "Admin"
+    },
+    "DefaultRole.Name" : {
+      "_type" : "Attribute",
+      "name" : "DefaultRole.Name",
+      "value" : "Role.Name'System Admin"
+    },
+    "Name" : {
+      "_type" : "Attribute",
+      "name" : "Name",
+      "value" : "Jogo"
+    },
+    "IsLoginDisabled" : {
+      "_type" : "Attribute",
+      "name" : "IsLoginDisabled",
+      "value" : false
+    },
+    "DefaultRole" : {
+      "_type" : "Relation",
+      "name" : "DefaultRole",
+      "value" : {
+        "_type" : "Asset",
+        "href" : "/versionone.web/rest-1.v1/Data/Role/1",
+        "idref" : "Role:1"
+      }
+    }
+  }
+}
+```
+There's a test case in the tests project called `AssetXmlToJsonTranslatorTests` which slims this JSON down quite a bit:
+
+So, for an asset with this XML:
+
+```xml
+<?xml version="1.0" encoding="utf-16"?>
+<Asset href="/versionone.web/rest-1.v1/Data/Member/20" id="Member:20">
+    <Attribute name="DefaultRole.Name">Role.Name'System Admin</Attribute>
+    <Attribute name="SecurityScope.Name" />
+    <Attribute name="Ideas" />
+    <Attribute name="AssetState">64</Attribute>
+    <Attribute name="SendConversationEmails">true</Attribute>
+    <Attribute name="Username">admin</Attribute>
+    <Attribute name="Followers.Name" />
+    <Attribute name="Description" />
+    <Attribute name="Email">admin@company.com</Attribute>
+</Asset>
+```
+This slimmed JSON will be produced:
+
+```json
+{
+  "Asset": {
+    "href": "\/versionone.web\/rest-1.v1\/Data\/Member\/20",
+    "id": "Member:20"
+  },
+  "Data": {
+    "DefaultRole.Name": "Role.Name'System Admin",
+    "SecurityScope.Name": "",
+    "Ideas": "",
+    "AssetState": "64",
+    "SendConversationEmails": "true",
+    "Username": "admin",
+    "Followers.Name": "",
+    "Description": "",
+    "Email": "admin@company.com"
+  }
+}
+```
+This, like the rest of this experimental repository, is under active development and we welcome your feedback and contributions!
