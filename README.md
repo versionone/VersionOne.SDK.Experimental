@@ -184,7 +184,36 @@ However, this produces very verbose JSON, similar to XML:
   }
 }
 ```
-There's a test case in the tests project called `AssetXmlToJsonTranslatorTests` which slims this JSON down quite a bit:
+From the command line, you'd need to escape the `&` character with a `^` in a Windows Batch file, or a `\` character in Bash:
+
+```batch
+curl -X POST --basic -u admin:admin ^
+http://localhost/VersionOne.Web/rest-1.v1/Data/Member/20?fmt=json^&accept=text/json ^
+--data "{'Phone':'555', 'Name':['set','Jogo']}"
+```
+
+The output is now:
+
+```json
+{
+  "_type" : "Asset",
+  "href" : "/VersionOne.Web/rest-1.v1/Data/Member/20/1930",
+  "id" : "Member:20:1930",
+  "Attributes" : {
+    "Phone" : {
+      "_type" : "Attribute",
+      "name" : "Phone",
+      "value" : "555"
+    },
+    "Name" : {
+      "_type" : "Attribute",
+      "name" : "Name",
+      "value" : "Jogo"
+    }
+  }
+}
+```
+Again, very verbose. There's a test case in the tests project called `AssetXmlToJsonTranslatorTests` which slims this JSON down quite a bit:
 
 So, for an asset with this XML:
 
