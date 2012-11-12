@@ -275,6 +275,47 @@ $("#output").html("Hello " + userName
 
 This, like the rest of this experimental repository, is under active development and we welcome your feedback and contributions!
 
+## Using JavaScript against the API via jQuery in Chrome console
+
+Here's another quick trick you can do against the API using standard [jQuery `$.ajax`](http://api.jquery.com/jQuery.ajax/) calls.
+
+1. Load your own instance of VersionOne in Chrome
+2. Hit `F12` to open the developer tools, and select the Console tab
+3. Type `$` and hit enter to verify that you're on a page that has jQuery loaded
+4. If you get the correct script printed, you're good to go.
+
+**Note**: in these examples, you do not have to pass any authentication information because your existing browser cookie already gets sent to VersionOne along with the HTTP request.
+
+Now, type this into the console and hit enter. You can use `Shift + Enter` to navigate up and down without executing:
+
+```javascript
+$.ajax({
+    url: "rest-1.v1/Data/Member/20",
+}).done(function(data) {  
+    console.log(data)
+});​
+```
+This should show the resulting XML document for the admin user, if you can access that. Otherwise, try a different id.
+
+You can also do this to update an asset:
+
+```javascript
+$.ajax({
+  //data: "{ 'Name' : 'adminNameChange' }", // <-- when JSON support gets baked in!
+  data: "<Asset><Attribute name='Name' act='set'>adminNameChange</Attribute></Asset>",
+  type : 'POST',
+  url: "rest-1.v1/Data/Member/20?format=text/json",
+}).done(function(data) {  
+    console.log(data);
+});
+```
+As you can see, once we get JSON input as a supported format, it will be much less verbose, and coupled with
+slimmified JSON output, it will be a powerful simplification.
+
+This will tie in well with the concept of Teamroom UI plugins that is being worked on by other VersionOne developers. 
+
+It will thus be very easy for a custom Teamroom plugin to subscribe to allow you to program against the VersionOne API directly using the simple jQuery `$.ajax` API.
+
 ## Python plugins
 
 We're also incorporating support for Python-based plugins via the [IronPython](http://ironpython.net/) dynamic language. 
