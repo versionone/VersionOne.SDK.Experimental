@@ -276,7 +276,7 @@ $("#output").html("Hello " + userName
 
 This, like the rest of this experimental repository, is under active development and we welcome your feedback and contributions!
 
-## Using JavaScript against the API via jQuery in Chrome console
+## Using jQuery.Ajax API against the VersionOne API
 
 Here's another quick trick you can do against the API using standard [jQuery `$.ajax`](http://api.jquery.com/jQuery.ajax/) calls.
 
