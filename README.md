@@ -336,7 +336,7 @@ You'll first have to modify your `Web.config` file to have these settings in it:
 ```
 Code:
 
-```
+```javascript
 var assetUrl = "http://localhost/VersionOne.Web/rest-1.v1/Data/Member/20?accept=text/json";
 // assetUrl += "&format=text/json"; // <-- not quite yet!
 var headers = { "Authorization": "Basic " + btoa("admin:admin") };
