@@ -10,8 +10,9 @@ will make your jobs, as developers and users, easier and more productive. If you
 
 # What's inside
 
-* C# based plugins
-* Python (IronPython) plugins
+* Server side C# / .NET plugins
+* Using jQuery.Ajax API against the VersionOne API
+* Server side Python (IronPython) plugins
 
 ## ApiInputTranslatorPlugins
 
@@ -316,7 +317,66 @@ This will tie in well with the concept of Teamroom UI plugins that is being work
 
 It will thus be very easy for a custom Teamroom plugin to subscribe to allow you to program against the VersionOne API directly using the simple jQuery `$.ajax` API.
 
-## Python plugins
+## Using JSFiddle against your own instance
+
+Here's slightly more interactive example you can [run at JSFiddle](http://jsfiddle.net/tTpSG/4/) against your own VersionOne instance.
+
+You'll first have to modify your `Web.config` file to have these settings in it:
+
+```xml
+<system.webServer>
+    <httpProtocol>
+        <customHeaders>
+            <add name="Access-Control-Allow-Origin" value="*" />
+            <add name="Access-Control-Allow-Headers" value="Authorization" />
+            <add name="Access-Control-Allow-Methods" value="POST, GET, PUT, DELETE, OPTIONS" />
+        </customHeaders>
+    </httpProtocol>
+</system.webServer>
+```
+Code:
+
+```
+var assetUrl = "http://localhost/VersionOne.Web/rest-1.v1/Data/Member/20?accept=text/json";
+// assetUrl += "&format=text/json"; // <-- not quite yet!
+var headers = { "Authorization": "Basic " + btoa("admin:admin") };
+var initialName;
+
+$("#run").click(function() {
+    $.ajax({
+        url: assetUrl,
+        headers: headers 
+        }).done(function (data) {  
+            console.log(data);
+            initialName = data.Attributes.Name.value;
+            $("#output").append("Initial value: " + initialName + "<hr/>");
+    
+            var newName = $("#newName").val();
+    
+            changeName(newName, function() {
+                changeName(initialName);                
+            });        
+    });
+    
+    function changeName(name, nextFunc) {
+        $.ajax({
+            url: assetUrl,
+            //data : JSON.stringify({'Name': name}), // <-- not quite yet!
+            data : "<Asset><Attribute name='Name' act='set'>" + name + "</Attribute></Asset>",
+            type : 'POST',
+            headers: headers
+            }).done(function (data) {  
+                console.log(data);
+                $("#output").append("Changed to: " + data.Attributes.Name.value + "<hr/>");
+                if (nextFunc) {
+                    nextFunc();
+                }
+        });
+    }
+});
+```
+
+## Server side Python plugins
 
 We're also incorporating support for Python-based plugins via the [IronPython](http://ironpython.net/) dynamic language. 
 
