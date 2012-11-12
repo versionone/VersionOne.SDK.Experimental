@@ -492,3 +492,60 @@ namespace VersionOne.Web.Plugins.Python.Tests
     }
 }
 ```
+### Exporting classes from Python via MEF
+
+Thanks to code we're adapting from [Bruno Lopes](https://github.com/brunomlopes/ILoveLucene/commit/38d2892e629c3498eb66b04ef4ba1a989e036ddb#commitcomment-2139215), we will be able to export types from Python as first-class MEFizens. Here's a test:
+
+```c#
+        [Test]
+        public void can_export_types_from_python_with_export_decorator()
+        {
+            const string pythonCode = 
+@"@export(ITranslateApiInputToAssetXml)
+class TranslateYamlToAssetXml(ITranslateApiInputToAssetXml):
+    def CanTranslate(self, contentType):
+        return contentType.lower() in map(str.lower, ['text/yaml', 'application/yaml', 'yaml'])
+    
+    def Execute(self, input):
+        output = '<Asset><Attribute name=""Name"" act=""set"">' + input + '</Attribute></Asset>'
+        reader = StringReader(output)
+        doc = XPathDocument(reader)
+        return doc
+";
+
+            var _engine = Python.CreateEngine();
+            var script = _engine.CreateScriptSourceFromString(pythonCode);
+
+            var types = new[]
+                            {
+                                typeof (ITranslateApiInputToAssetXml),
+                                typeof (System.Xml.XPath.XPathDocument),
+                                typeof (System.IO.StringReader)
+                            };
+            var typeExtractor = new ExtractTypesFromScript(_engine);
+            var exports = typeExtractor.GetPartsFromScript(script, types.ToList()).ToList();
+
+            var container = new CompositionContainer();
+            var batch = new CompositionBatch(exports, new ComposablePart[] { });
+            container.Compose(batch);
+
+            var instance = new MockTranslatorImporter();
+            container.SatisfyImportsOnce(instance);
+            
+            Assert.AreEqual(1, instance.Translators.Count());
+
+            var translators = instance.Translators.ToList();
+
+            Assert.IsTrue(translators[0].CanTranslate("text/yaml"));
+            Assert.IsFalse(translators[0].CanTranslate("text/buggabugga"));
+
+            const string expected = 
+@"<Asset>
+  <Attribute name=""Name"" act=""set"">My Test</Attribute>
+</Asset>";
+            var doc = translators[0].Execute("My Test");
+            var actual = doc.CreateNavigator().OuterXml;
+
+            Assert.AreEqual(expected, actual);
+        }
+```
