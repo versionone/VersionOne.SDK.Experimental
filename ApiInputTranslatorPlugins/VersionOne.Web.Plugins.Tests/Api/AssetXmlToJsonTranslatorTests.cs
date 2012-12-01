@@ -45,28 +45,28 @@ namespace VersionOne.Web.Plugins.Tests.Api
 
                 var json = JsonObject.Create();
 
-                json.AddProperty("Asset", p =>
-                                              {
-                                                  var assetNode = nav.SelectSingleNode("//Asset");
-                                                  var href = assetNode.GetAttribute("href", string.Empty);
-                                                  var idref = assetNode.GetAttribute("id", string.Empty);
-                                                  p
-                                                      .AddProperty("href", href)
-                                                      .AddProperty("id", idref);
-                                              }
+                json.AddProperty("Asset", obj =>
+                        {
+                            var assetNode = nav.SelectSingleNode("//Asset");
+                            var href = assetNode.GetAttribute("href", string.Empty);
+                            var idref = assetNode.GetAttribute("id", string.Empty);
+                            obj
+                                .AddProperty("href", href)
+                                .AddProperty("id", idref);
+                        }
                     )
-                    .AddProperty("Data", p =>
-                                             {
-                                                 var attributes = nav.Select("//Attribute");
-                                                 while (attributes.MoveNext())
-                                                 {
-                                                     var nodeNav = attributes.Current;
-                                                     var attrName = nodeNav.GetAttribute("name", string.Empty);
-                                                     var attrValue = nodeNav.Value;
-                                                     p
-                                                         .AddProperty(attrName, attrValue);
-                                                 }
-                                             }
+                    .AddProperty("Data", obj =>
+                        {
+                            var attributes = nav.Select("//Attribute");
+                            while (attributes.MoveNext())
+                            {
+                                var nodeNav = attributes.Current;
+                                var attrName = nodeNav.GetAttribute("name", string.Empty);
+                                var attrValue = nodeNav.Value;
+                                obj
+                                    .AddProperty(attrName, attrValue);
+                            }
+                        }
                     );
 
                 var jsonString = json.ToJson();
