@@ -66,7 +66,7 @@ This is what multiple looks like:
 
             Assert.AreEqual(expected, actual);
         }
-
+```
 Below, I suggest an object syntax instead of array syntax for modifying relations, and I thought maybe that could be used in the example above too:
 
  ```javascript
