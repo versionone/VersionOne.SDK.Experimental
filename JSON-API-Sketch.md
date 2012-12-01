@@ -111,7 +111,7 @@ Content-Length: 98
 ### JSON Idea(s)
 
 ```javascript
-[{'Asset':'Member:20'}]
+[{'Owner':'Member:20'}]
 ```
 ### JSON Notes
 To distinguish the list of relations from a literal object of attributes, I suggest an array with a single object item, itself assumed to contain an array of relations. 
