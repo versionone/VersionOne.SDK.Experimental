@@ -34,7 +34,7 @@ The response is:
 
 ### JSON Idea(s)
 
-```json
+```javascript
 { 'Phone' : '555-555-1212' }
 ```
 ### JSON Notes
@@ -95,7 +95,7 @@ Content-Length: 98
 ```
 ### JSON Idea(s)
 
-```json
+```javascript
 [{'Asset':'Member:20'}]
 ```
 ### JSON Notes
@@ -118,7 +118,7 @@ Content-Length: 67
 ```
 ### JSON Idea(s)
 
-```json
+```javascript
 // 1:
 [{'Owner':''}]
 
@@ -149,7 +149,7 @@ Content-Length: 197
 ```
 ### JSON Idea(s)
 
-```json
+```javascript
 // Multivalue, all add by default:
 [{'Asset':['Member:1000', 'Member:1001']}]
 
@@ -191,7 +191,7 @@ Content-Length: 221
 ```
 ### JSON Idea(s)
 
-```json
+```javascript
 [
  {Name:'New Story'},
  [
