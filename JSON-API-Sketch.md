@@ -37,6 +37,41 @@ The response is:
 ```json
 { 'Phone' : '555-555-1212' }
 ```
+### JSON Notes
+
+There are test cases for single and [also for multiple attributes here](https://github.com/versionone/VersionOne.SDK.Experimental/blob/master/ApiInputTranslatorPlugins/VersionOne.Web.Plugins.Tests/Api/TranslateJsonInputToAssetXmlTests.cs#L47-L67).
+
+This is what multiple looks like:
+
+```c#
+        [Test]
+        public void multiple_attribute_update_has_correct_actions()
+        {
+            const string input =
+    @"
+    { 'Name' : 'Josh', 'Phone' : ['set', '555'], 'Address': ['remove'], 'Info' : ['add', 'newvalue'] }
+    ";
+
+            const string expected =
+    @"<Asset>
+      <Attribute name=""Name"" act=""set"">Josh</Attribute>
+      <Attribute name=""Phone"" act=""set"">555</Attribute>
+      <Attribute name=""Address"" act=""remove"" />
+      <Attribute name=""Info"" act=""add"">newvalue</Attribute>
+    </Asset>";
+
+            _subject = new TranslateJsonInputToAssetXml();
+
+            var actual = _subject.Execute(input).CreateNavigator().OuterXml;
+
+            Assert.AreEqual(expected, actual);
+        }
+
+Below, I suggest an object syntax instead of array syntax for modifying relations, and I thought maybe that could be used in the example above too:
+
+ `'Info': {'add':'newvalue'}` instead of `'Info': ['add', 'newvalue']`
+
+ However, it would be kludgy in the remove case: `'Address': {'remove':''}` instead of `'Address': ['remove']`
 
 ### Remarks
 
