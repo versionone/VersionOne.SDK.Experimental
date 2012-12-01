@@ -174,7 +174,7 @@ Content-Length: 197
 // Don't know if we need / do this, but we could have multiple types of relations this way:
 
 [ 
- { 'Asset' : ['Member:1000', ['remove', 'Member:1001'] },
+ { 'Asset' : ['Member:1000', ['remove', 'Member:1001'] ] },
  { 'Scope' : ['Something:0001', 'Something:0002', ['remove', 'Something:0003'] ] }
 ]
 ```
