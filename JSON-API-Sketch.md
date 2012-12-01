@@ -31,6 +31,13 @@ The response is:
 	<Attribute name="Phone">555-555-1212</Attribute>
 </Asset>
 ```
+
+### JSON Idea(s)
+
+```json
+{ 'Phone' : '555-555-1212' }
+```
+
 ### Remarks
 
 The response includes the URL of the exact version of the asset that was just updated.
@@ -51,6 +58,16 @@ Content-Length: 98
 	</Relation>
 </Asset>
 ```
+### JSON Idea(s)
+
+```json
+[{'Asset':'Member:20'}]
+```
+### JSON Notes
+To distinguish the list of relations from a literal object of attributes, I suggest an array with a single object item, itself assumed to contain an array of relations. 
+
+# QUESTION: We don't have anything besides Attribute and Relation, do we?
+
 Whereas this post will change the Owner of the Scope with ID 0 to nobody (that is, NULL):
 
 ```
@@ -64,6 +81,20 @@ Content-Length: 67
 	</Relation>
 </Asset>
 ```
+### JSON Idea(s)
+
+```json
+// 1:
+[{'Owner':''}]
+
+// Or 2:
+[{'Owner':null}]
+
+// Or, support both?
+```
+### JSON Notes
+Either empty string or null should make it clear you want to nullify it.
+
 ## How to add and remove values from a multi-value relation
 
 Updating a multi-value relation is accomplished by marking enclosed Asset elements with either `act="add"` or `act="remove"`. This post will add one Member and remove another Member from the Scope with ID 0:
@@ -81,6 +112,31 @@ Content-Length: 197
 	</Relation>
 </Asset>
 ```
+### JSON Idea(s)
+
+```json
+// Multivalue, all add by default:
+[{'Asset':['Member:1000', 'Member:1001']}]
+
+// Multivalue, one add implicitly, one del explicitly
+[{'Asset':['Member:1000', ['remove', 'Member:1001']]}]
+
+// Don't know if we need / do this, but we could have multiple types of relations this way:
+
+[ 
+ { 'Asset' : ['Member:1000', ['remove', 'Member:1001'] },
+ { 'Scope' : ['Something:0001', 'Something:0002', ['remove', 'Something:0003'] ] }
+]
+```
+### JSON Notes
+Perhaps instead of an array for the remove case, it could be an object, it's the same number of keystrokes:
+
+` [ { 'Asset': [ {'remove':'Member:1001'} ] } ]`
+
+Or, if there is only one item, then don't require the additional brackets to save some keys:
+
+` [ { 'Asset': {'remove':'Member:1001'} } ]`
+
 ## How to create a new asset
 
 Creating a new asset is accomplished by posting to the asset type URL (without an ID). This post will create a Story with the name "New Story", within the Scope with ID 0.
@@ -98,6 +154,56 @@ Content-Length: 221
 	</Relation>
 </Asset>
 ```
+### JSON Idea(s)
+
+```json
+[
+ {Name:'New Story'},
+ [
+  {'Scope':'Scope:0'}
+ ]
+]
+
+```
+### JSON Notes
+
+I already have this basic approach working at: [Tests cases for TranslateJsonInputToAssetXml](https://github.com/versionone/VersionOne.SDK.Experimental/blob/master/ApiInputTranslatorPlugins/VersionOne.Web.Plugins.Tests/Api/TranslateJsonInputToAssetXmlTests.cs#L81-L99)
+
+Here's an example:
+
+```csharp
+    [Test]
+    public void create_asset_with_multiple_attributes_and_single_relation()
+    {
+        const string input =
+    @"
+    [
+        { 
+           'Name':'Commit'
+          ,'URL': 'http://jgough/apiservice/commits.html?id=1'
+          ,'OnMenu':true
+        }
+        , [ {'Asset': 'Story:1082'} ] 
+    ]
+    ";
+
+    const string expected =
+    @"<Asset>
+      <Attribute name=""Name"" act=""set"">Commit</Attribute>
+      <Attribute name=""URL"" act=""set"">http://jgough/apiservice/commits.html?id=1</Attribute>
+      <Attribute name=""OnMenu"" act=""set"">True</Attribute>
+      <Relation name=""Asset"" act=""set"">
+        <Asset idref=""Story:1082"" />
+      </Relation>
+    </Asset>";
+            _subject = new TranslateJsonInputToAssetXml();
+
+            var actual = _subject.Execute(input).CreateNavigator().OuterXml;
+
+            Assert.AreEqual(expected, actual);
+        }
+```
+
 
 The response is:
 
