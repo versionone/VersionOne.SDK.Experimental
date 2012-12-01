@@ -1,6 +1,52 @@
 # Thoughts on JSON API
 
-This text comes from the existing [Data API Docs](http://community.versionone.com/sdk/Documentation/DataAPI.aspx).
+First, here's a protoype example (in [Integration.CommitService](https://github.com/versionone/Integration.CommitService/blob/master/CommitService/Commits.html)), in CoffeeScript of using the JSON based Create Asset support in the [TranslateJsonInputToAssetXml plugin](https://github.com/versionone/VersionOne.SDK.Experimental/blob/master/ApiInputTranslatorPlugins/VersionOne.Web.Plugins/Api/TranslateJsonInputToAssetXml.cs):
+
+```coffeescript
+associateWorkItemWithCommitCommand = ->
+    url = singleCommitUrl + commitId
+    
+    assetJson = "[ { Name : 'Commit', URL : '#{url}', OnMenu : true}, [ { Asset : '#{workItemId}' } ] ]"
+    
+    $.ajax
+        type: 'POST'
+        url: linkService + "?fmt=json"
+        headers: headers
+        data: assetJson
+        success: (data) ->  
+            console.log data if debug
+```
+
+Here's the same code using XML:
+
+```coffeescript
+associateWorkItemWithCommitCommand = ->
+    url = singleCommitUrl + commitId
+
+    assetXml = """
+<Asset>
+    <Attribute name="Name" act="set">Commit</Attribute>
+    <Attribute name="URL" act="set">#{url}</Attribute>
+    <Attribute name="OnMenu" act="set">true</Attribute>
+    <Relation name="Asset" act="set">
+        <Asset idref="#{workItemId}" />
+    </Relation>
+</Asset>
+"""
+    $.ajax
+        type: 'POST'
+        url: linkService
+        headers: headers
+        data: assetXml
+        success: (data) ->  
+            console.log data if debug
+```
+
+It's clear to me JSON is cleaner! :-D
+
+With that in mind:
+
+This rest of of this is copied, then commented upon, from the existing [Data API Docs](http://community.versionone.com/sdk/Documentation/DataAPI.aspx).
 
 I've added one or more JSON samples as suggestions after the XML fragments.
 
