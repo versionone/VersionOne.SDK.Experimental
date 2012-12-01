@@ -15,22 +15,69 @@ namespace VersionOne.Web.Plugins.Api
     {
         public XPathDocument Execute(string input)
         {
-            var jsonObject = (JObject)JsonConvert.DeserializeObject(input);
-            var buffer = new StringBuilder();
-
-            foreach (var item in jsonObject.Root)
+            try
             {
-                if (item.First.Type == JTokenType.String)
-                {
-                    AddAssetAttributeFromJValueString(item, buffer);
-                }
-                else if (item.First.Type == JTokenType.Array)
-                {
-                    AddAttributeFromJArray(item, buffer);
-                }
-            }
+                var jsonObject = (JObject)JsonConvert.DeserializeObject(input);
+                var buffer = new StringBuilder();
 
-            return CreateUpdateAssetXmlFragment(buffer);
+                foreach (var item in jsonObject.Root)
+                {
+                    if (new [] {JTokenType.String, JTokenType.Boolean}.Any(x => x.Equals(item.First.Type)))
+                    {
+                        AddAssetAttributeFromJValueScalar(item, buffer);
+                    }
+                    else if (item.First.Type == JTokenType.Array)
+                    {
+                        AddAttributeFromJArray(item, buffer);
+                    }
+                }
+
+                return CreateUpdateAssetXmlFragment(buffer);
+            }
+            catch
+            {
+                var jsonObject = (JArray)JsonConvert.DeserializeObject(input);
+                var buffer = new StringBuilder();
+
+                var props = jsonObject.Root[0];
+                foreach (var item in props)
+                {
+                    if (new[] { JTokenType.String, JTokenType.Boolean }.Any(x => x.Equals(item.First.Type)))
+                    {
+                        AddAssetAttributeFromJValueScalar(item, buffer);
+                    }
+                    else if (item.First.Type == JTokenType.Array)
+                    {
+                        AddAttributeFromJArray(item, buffer);
+                    }
+                }
+                
+                if (jsonObject.Count() > 1)
+                {
+                    var relations = jsonObject.Root[1];
+                    foreach (var relation in relations)
+                    {
+                        JProperty relationship = (JProperty)relation.First;
+                        var name = relationship.Name;
+                        var value = relationship.Value;
+                        AddRelation(buffer, name, value);
+                    }
+                }
+
+                return CreateUpdateAssetXmlFragment(buffer);
+            }
+        }
+
+        private static void AddRelation(StringBuilder buffer, object relationName, object relationValue)
+        {
+            const string relationTemplate =
+@" <Relation name=""{0}"" act=""set"">
+  <Asset idref=""{1}"" />
+ </Relation>
+";
+            var relation = string.Format(relationTemplate, relationName, relationValue);
+
+            buffer.Append(relation);
         }
 
         private static XPathDocument CreateUpdateAssetXmlFragment(StringBuilder buffer)
@@ -60,7 +107,7 @@ namespace VersionOne.Web.Plugins.Api
             return attribute;
         }
 
-        private static void AddAssetAttributeFromJValueString(JToken item, StringBuilder buffer)
+        private static void AddAssetAttributeFromJValueScalar(JToken item, StringBuilder buffer)
         {
             var property = item as JProperty;
             var name = property.Name;
@@ -76,20 +123,20 @@ namespace VersionOne.Web.Plugins.Api
             string attribute = string.Empty;
 
             var act = array[0].Value<string>();
-            if (new []{"set", "add"}.Any(a => a.Equals(act, StringComparison.OrdinalIgnoreCase)))
+            if (new[] { "set", "add" }.Any(a => a.Equals(act, StringComparison.OrdinalIgnoreCase)))
             {
                 var value = array[1].Value<string>();
-                attribute = CreateAssetAttributeForUpdateOrAdd(new [] { name, act, value });
+                attribute = CreateAssetAttributeForUpdateOrAdd(new[] { name, act, value });
             }
             else if (act.Equals("remove", StringComparison.OrdinalIgnoreCase))
             {
-                attribute = CreateAssetAttributeForRemove(new [] { name, act });
+                attribute = CreateAssetAttributeForRemove(new[] { name, act });
             }
-            
+
             buffer.Append(attribute);
         }
 
-        private static readonly string[] ContentTypes = new []
+        private static readonly string[] ContentTypes = new[]
             {
                 "json",
                 "text/json",
