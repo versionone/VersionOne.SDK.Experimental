@@ -69,9 +69,24 @@ This is what multiple looks like:
 
 Below, I suggest an object syntax instead of array syntax for modifying relations, and I thought maybe that could be used in the example above too:
 
- `'Info': {'add':'newvalue'}` instead of `'Info': ['add', 'newvalue']`
+ ```javascript
+ 'Info': {'add':'newvalue'}
+ ```
+instead of:
 
- However, it would be kludgy in the remove case: `'Address': {'remove':''}` instead of `'Address': ['remove']`
+```javascript
+'Info': ['add', 'newvalue']
+```
+However, it would be kludgy in the remove case: 
+
+```javascript
+'Address': {'remove':''}
+``` 
+instead of:
+
+```javascript
+'Address': ['remove']
+```
 
 ### Remarks
 
