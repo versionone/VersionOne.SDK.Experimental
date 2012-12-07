@@ -6,7 +6,6 @@ namespace VersionOne.Web.Plugins.Tests.Api
     [TestFixture]
     public class TranslateJsonInputToAssetXmlTests
     {
-
         private TranslateJsonInputToAssetXml _subject;
 
         [TestCase("json", true)]
@@ -69,7 +68,7 @@ namespace VersionOne.Web.Plugins.Tests.Api
         [Test]
         public void create_asset_with_multiple_attributes_and_single_relation()
         {
-
+            var example =
 @"
 // Multivalue, all add
 [{'Asset':['Member:1000', 'Member:1001']}]
@@ -77,7 +76,7 @@ namespace VersionOne.Web.Plugins.Tests.Api
 // Multivalue, one add, one del
 [{'Asset':['Member:1000', ['Member:1001', 'remove']]}]
 
-"
+";
             const string input =
 @"
 [{Name:""Commit"",URL:""http://jgough/apiservice/commits.html?id=1"",OnMenu:true},[{""Asset"":""Story:1082""}]]

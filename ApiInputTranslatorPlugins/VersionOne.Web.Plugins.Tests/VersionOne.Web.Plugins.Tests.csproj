@@ -51,7 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Api\AssetXmlToJsonTranslatorTests.cs" />
+    <Compile Include="Api\TranslateAssetXmlOutputToJsonTests.cs" />
     <Compile Include="Api\TranslateJsonInputToAssetXmlTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
