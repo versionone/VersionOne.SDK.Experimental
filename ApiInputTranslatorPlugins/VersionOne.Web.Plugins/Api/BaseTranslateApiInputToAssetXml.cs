@@ -10,14 +10,14 @@ namespace VersionOne.Web.Plugins.Api
     [Export(typeof(ITranslateApiInputToAssetXml))]
     public abstract class BaseTranslateApiInputToAssetXml
     {
-        protected readonly XmlAssetBuilder _builder = new XmlAssetBuilder();
+        protected readonly XmlAssetBuilder Builder = new XmlAssetBuilder();
 
         protected void AddRelations(string name, object obj)
         {
             if (name.Equals("_links", StringComparison.OrdinalIgnoreCase))
             {
                 var relationList = new RelationList();
-                var links = GetObjectItems(obj);
+                var links = GetLinkRelationObjects(obj);
                 foreach (var link in links)
                 {
                     var relation = new Relation(GetKey(link));
@@ -36,11 +36,11 @@ namespace VersionOne.Web.Plugins.Api
                     }
                     relationList.Add(relation);
                 }
-                _builder.AddRelationsFromRelationList(relationList);
+                Builder.AddRelationsFromRelationList(relationList);
             }
         }
 
-        protected abstract IEnumerable GetObjectItems(object obj);
+        protected abstract IEnumerable GetLinkRelationObjects(object obj);
 
         protected abstract string GetKey(object item);
 
@@ -59,12 +59,12 @@ namespace VersionOne.Web.Plugins.Api
             {
                 var value = array[1];
                 var attr = new Attribute(name, value, act);
-                _builder.AddAttributeFromArray(attr);
+                Builder.AddAttributeFromArray(attr);
             }
             else if (act.Equals("remove", StringComparison.OrdinalIgnoreCase))
             {
                 var attr = Attribute.CreateForRemove(name);
-                _builder.AddAttributeFromArray(attr);
+                Builder.AddAttributeFromArray(attr);
             }
         }
 
@@ -74,7 +74,7 @@ namespace VersionOne.Web.Plugins.Api
 
         protected XPathDocument GetAssetXml()
         {
-            return _builder.GetAssetXml();
+            return Builder.GetAssetXml();
         }
     }
 }

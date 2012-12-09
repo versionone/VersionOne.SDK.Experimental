@@ -39,10 +39,10 @@ namespace VersionOne.Web.Plugins.Api
                 }
             }
 
-            return _builder.GetAssetXml();
+            return Builder.GetAssetXml();
         }
 
-        protected override IEnumerable GetObjectItems(object obj)
+        protected override IEnumerable GetLinkRelationObjects(object obj)
         {
             var entry = obj as YamlMappingNode;
             return entry;
@@ -88,7 +88,7 @@ namespace VersionOne.Web.Plugins.Api
         {
             var obj = (YamlScalarNode) scalar;
             var value = obj.Value;
-            _builder.AddAssetAttributeFromScalar(name, value);
+            Builder.AddAssetAttributeFromScalar(name, value);
         }
 
         protected override object[] GetArrayFromObject(object obj)

@@ -38,7 +38,7 @@ namespace VersionOne.Web.Plugins.Api
             return GetAssetXml();
         }
 
-        protected override IEnumerable GetObjectItems(object obj)
+        protected override IEnumerable GetLinkRelationObjects(object obj)
         {
             var links = obj as JObject;
             return links.Properties();
@@ -93,7 +93,7 @@ namespace VersionOne.Web.Plugins.Api
         protected override void AddAttributeFromScalar(string name, object scalar)
         {
             var prop = scalar as JProperty;
-            _builder.AddAssetAttributeFromScalar(name, prop.Value);
+            Builder.AddAssetAttributeFromScalar(name, prop.Value);
         }
 
         private static readonly string[] ContentTypes = new[]
