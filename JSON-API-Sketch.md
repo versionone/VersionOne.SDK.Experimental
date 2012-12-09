@@ -54,6 +54,69 @@ As of now, I've only added examples for INPUT, not the output as JSON yet.
 
 Comments very welcome!
 
+# Note: Documentation not as up-to-date as code and tests
+
+This document is not always as up-to-date as the code and test cases.
+
+We're adding support for HAL, the [Hypertext Application Language](http://stateless.co/hal_specification.html) specification in both JSON and [YAML](http://en.wikipedia.org/wiki/YAML) flavors.
+
+This is not yet reflected in the rest of this document, but here's a summary:
+
+Given this JSON input:
+
+```javascript
+{
+    Name:"Commit",
+    URL:"http://jgough/apiservice/commits.html?id=1",
+    OnMenu:true,
+    RemoveProp:["remove"],
+    AddToProp:["add","addedValue"],
+    _links: {
+        "Asset":
+            [
+                {"idref":"Story:1082"},
+                {"idref":"Story:9090"}
+            ],
+        "Scope" : { "idref" : "Scope:0" }        
+    }
+}
+```
+
+Or, given this YAML input:
+
+```yaml
+Name:   Commit
+URL:    http://jgough/apiservice/commits.html?id=1
+OnMenu: true
+RemoveProp: [remove]
+AddToProp:  [add, Added Value]
+_links:
+    Asset:
+        - idref: Story:1082
+        - idref: Story:9090
+    Scope:
+        - idref: Scope:0
+```
+
+We'll translate to this Asset XML:
+
+```xml
+<Asset>
+  <Attribute name="Name" act="set">Commit</Attribute>
+  <Attribute name="URL" act="set">http://jgough/apiservice/commits.html?id=1</Attribute>
+  <Attribute name="OnMenu" act="set">true</Attribute>
+  <Attribute name="RemoveProp" act="remove" />
+  <Attribute name="AddToProp" act="add">Added Value</Attribute>
+  <Relation name="Asset" act="set">
+    <Asset idref="Story:1082" />
+    <Asset idref="Story:9090" />
+  </Relation>
+  <Relation name="Scope" act="set">
+    <Asset idref="Scope:0" />
+  </Relation>  
+</Asset>
+```
+
 # Learn By Example: Updates
 
 Updating assets through the API involves sending POST requests to the URL of the asset to be updated, with an XML payload. These examples can be tested in your browser by using the page [http://localhost/VersionOne/http.html](http://localhost/VersionOne/http.html).
