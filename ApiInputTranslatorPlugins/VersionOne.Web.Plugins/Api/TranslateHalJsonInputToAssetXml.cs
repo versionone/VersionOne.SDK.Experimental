@@ -10,12 +10,12 @@ using Newtonsoft.Json.Linq;
 namespace VersionOne.Web.Plugins.Api
 {
     [Export(typeof(ITranslateApiInputToAssetXml))]
-    public class TranslateHalJsonInputToAssetXml : 
+    public class TranslateHalJsonInputToAssetXml :
         BaseTranslateApiInputToAssetXml, ITranslateApiInputToAssetXml
     {
         public XPathDocument Execute(string input)
         {
-            var jsonObject = (JObject) JsonConvert.DeserializeObject(input);
+            var jsonObject = (JObject)JsonConvert.DeserializeObject(input);
 
             foreach (var prop in jsonObject.Properties())
             {
@@ -23,36 +23,31 @@ namespace VersionOne.Web.Plugins.Api
 
                 if (prop.Value.Type == JTokenType.Object)
                 {
-                    AddRelations(name, prop.Value);
+                    AddRelationsFromLinks(name, prop.Value);
                 }
                 else if (prop.Value.Type == JTokenType.Array)
                 {
-                    AddAttributesWithExplicitActions(name, prop.Value);
+                    AddAttributesWithExplicitActionFromArray(name, prop.Value);
                 }
                 else if (prop.Type == JTokenType.Property)
                 {
-                    AddAttributeFromScalar(name, prop);
+                    AddAttributeFromScalarProperty(name, prop);
                 }
             }
 
             return GetAssetXml();
         }
 
-        protected override IEnumerable GetLinkRelationObjects(object obj)
+        protected override IEnumerable GetLinkGroupsFromRootProperty(object rootObject)
         {
-            var links = obj as JObject;
+            var links = rootObject as JObject;
             return links.Properties();
         }
 
-        protected override string GetKey(object item)
+        protected override string GetLinkGroupKeyFromProperty(object property)
         {
-            var link = item as JProperty;
+            var link = property as JProperty;
             return link.Name;
-        }
-
-        protected override IEnumerable GetRelationItemEnumerable(object obj)
-        {
-            return obj as JObject;
         }
 
         protected override Attribute CreateAttributeFromRelationItem(object obj)
@@ -61,10 +56,10 @@ namespace VersionOne.Web.Plugins.Api
             return new Attribute(prop.Name, prop.Value);
         }
 
-        protected override IEnumerable<object> GetRelationItems(object linkObj)
+        protected override IEnumerable<IEnumerable> GetLinkGroupRelations(object linkGroup)
         {
-            var link = linkObj as JProperty;
-            var relationItems = new List<object>();
+            var link = linkGroup as JProperty;
+            var relationItems = new List<JObject>();
 
             if (link.Value.Type == JTokenType.Array)
             {
@@ -90,7 +85,7 @@ namespace VersionOne.Web.Plugins.Api
             return array.Children().Cast<object>().ToArray();
         }
 
-        protected override void AddAttributeFromScalar(string name, object scalar)
+        protected override void AddAttributeFromScalarProperty(string name, object scalar)
         {
             var prop = scalar as JProperty;
             Builder.AddAssetAttributeFromScalar(name, prop.Value);

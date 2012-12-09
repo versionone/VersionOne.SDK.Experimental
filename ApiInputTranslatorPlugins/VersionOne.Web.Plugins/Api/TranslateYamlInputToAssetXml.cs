@@ -27,64 +27,64 @@ namespace VersionOne.Web.Plugins.Api
 
                 if (entry.Value is YamlMappingNode)
                 {
-                    AddRelations(name, entry.Value);
+                    AddRelationsFromLinks(name, entry.Value);
                 }
                 else if (entry.Value is YamlSequenceNode)
                 {
-                    AddAttributesWithExplicitActions(name, entry.Value);
+                    AddAttributesWithExplicitActionFromArray(name, entry.Value);
                 }
                 else if (entry.Value is YamlScalarNode)
                 {
-                    AddAttributeFromScalar(name, entry.Value);
+                    AddAttributeFromScalarProperty(name, entry.Value);
                 }
             }
 
             return Builder.GetAssetXml();
         }
 
-        protected override IEnumerable GetLinkRelationObjects(object obj)
+        protected override IEnumerable GetLinkGroupsFromRootProperty(object rootObject)
         {
-            var entry = obj as YamlMappingNode;
+            var entry = rootObject as YamlMappingNode;
             return entry;
         }
 
-        protected override string GetKey(object item)
+        protected override string GetLinkGroupKeyFromProperty(object property)
         {
-            var node = (KeyValuePair<YamlNode, YamlNode>)item;
+            var node = (KeyValuePair<YamlNode, YamlNode>)property;
             return node.Key.ToString();
-        }
-
-        protected override IEnumerable GetRelationItemEnumerable(object obj)
-        {
-            return obj as YamlMappingNode;
         }
 
         protected override Attribute CreateAttributeFromRelationItem(object obj)
         {
-            var relItem = (KeyValuePair<YamlNode, YamlNode>)obj;
-            return new Attribute(relItem.Key.ToString(), relItem.Value);
+            var relationItem = (YamlMappingNode)obj;
+            var attribute = relationItem.Children.Select(x => new Attribute(x.Key.ToString(),
+                x.Value)).FirstOrDefault();
+            return attribute;
         }
 
-        protected override IEnumerable<object> GetRelationItems(object linkObj)
+        protected override IEnumerable<IEnumerable> GetLinkGroupRelations(object linkGroup)
         {
-            var link = (KeyValuePair<YamlNode, YamlNode>)linkObj;
+            var link = (KeyValuePair<YamlNode, YamlNode>)linkGroup;
 
-            var relationItems = new List<object>();
+            var relationItems = new List<IEnumerable>();
 
             if (link.Value is YamlMappingNode)
             {
                 var value = (link.Value as YamlMappingNode);
-                relationItems = value.Children.Cast<object>().ToList();
+                relationItems.Add(value);
             }
             else if (link.Value is YamlSequenceNode)
             {
                 var value = (link.Value as YamlSequenceNode);
-                relationItems = value.Children.Cast<object>().ToList();
+                var list = new List<YamlNode>();
+                list.AddRange(value.Children.ToList());
+                relationItems.Add(list);
             }
+
             return relationItems;
         }
 
-        protected override void AddAttributeFromScalar(string name, object scalar)
+        protected override void AddAttributeFromScalarProperty(string name, object scalar)
         {
             var obj = (YamlScalarNode) scalar;
             var value = obj.Value;

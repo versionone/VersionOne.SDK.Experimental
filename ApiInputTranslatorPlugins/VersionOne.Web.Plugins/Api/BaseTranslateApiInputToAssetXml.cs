@@ -12,45 +12,59 @@ namespace VersionOne.Web.Plugins.Api
     {
         protected readonly XmlAssetBuilder Builder = new XmlAssetBuilder();
 
-        protected void AddRelations(string name, object obj)
+        protected void AddRelationsFromLinks(string name, object links)
         {
             if (name.Equals("_links", StringComparison.OrdinalIgnoreCase))
             {
                 var relationList = new RelationList();
-                var links = GetLinkRelationObjects(obj);
-                foreach (var link in links)
+                var linkGroups = GetLinkGroupsFromRootProperty(links);
+                foreach (var linkGroup in linkGroups)
                 {
-                    var relation = new Relation(GetKey(link));
-                    var relationItems = GetRelationItems(link);
+                    var relation = new Relation(GetLinkGroupKeyFromProperty(linkGroup));
+                    var linkGroupRelations = GetLinkGroupRelations(linkGroup);
 
-                    foreach (var item in relationItems)
+                    foreach (var linkGroupRelation in linkGroupRelations)
                     {
-                        var relationObjects = GetRelationItemEnumerable(item);
                         var relationAttributes = new List<Attribute>();
-                        foreach (var relItem in relationObjects)
+                        foreach (var relationItem in linkGroupRelation)
                         {
-                            var attr = CreateAttributeFromRelationItem(relItem);
-                            relationAttributes.Add(attr);
+                            var attribute = CreateAttributeFromRelationItem(relationItem);
+                            relationAttributes.Add(attribute);
                         }
                         relation.Add(relationAttributes);
                     }
                     relationList.Add(relation);
+
+                    // OLD:
+                    //var relation = new Relation(GetLinkGroupKeyFromProperty(linkGroup));
+                    //var linkGroupRelations = GetLinkGroupRelations(linkGroup);
+
+                    //foreach (var linkGroupRelation in linkGroupRelations)
+                    //{
+                    //    var relationObjects = GetRelationItemEnumerable(linkGroupRelation);
+                    //    var relationAttributes = new List<Attribute>();
+                    //    foreach (var relItem in relationObjects)
+                    //    {
+                    //        var attr = CreateAttributeFromRelationItem(relItem);
+                    //        relationAttributes.Add(attr);
+                    //    }
+                    //    relation.Add(relationAttributes);
+                    //}
+                    //relationList.Add(relation);
                 }
                 Builder.AddRelationsFromRelationList(relationList);
             }
         }
 
-        protected abstract IEnumerable GetLinkRelationObjects(object obj);
+        protected abstract IEnumerable GetLinkGroupsFromRootProperty(object rootObject);
 
-        protected abstract string GetKey(object item);
+        protected abstract string GetLinkGroupKeyFromProperty(object property);
 
-        protected abstract IEnumerable GetRelationItemEnumerable(object obj);
+        protected abstract IEnumerable<IEnumerable> GetLinkGroupRelations(object linkGroup);
 
         protected abstract Attribute CreateAttributeFromRelationItem(object obj);
 
-        protected abstract IEnumerable<object> GetRelationItems(object linkObj);
-
-        protected void AddAttributesWithExplicitActions(string name, object obj)
+        protected void AddAttributesWithExplicitActionFromArray(string name, object obj)
         {
             var array = GetArrayFromObject(obj);
 
@@ -70,7 +84,7 @@ namespace VersionOne.Web.Plugins.Api
 
         protected abstract object[] GetArrayFromObject(object obj);
 
-        protected abstract void AddAttributeFromScalar(string name, object scalar);
+        protected abstract void AddAttributeFromScalarProperty(string name, object scalar);
 
         protected XPathDocument GetAssetXml()
         {
