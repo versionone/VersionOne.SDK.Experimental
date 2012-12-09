@@ -34,23 +34,6 @@ namespace VersionOne.Web.Plugins.Api
                         relation.Add(relationAttributes);
                     }
                     relationList.Add(relation);
-
-                    // OLD:
-                    //var relation = new Relation(GetLinkGroupKeyFromProperty(linkGroup));
-                    //var linkGroupRelations = GetLinkGroupRelations(linkGroup);
-
-                    //foreach (var linkGroupRelation in linkGroupRelations)
-                    //{
-                    //    var relationObjects = GetRelationItemEnumerable(linkGroupRelation);
-                    //    var relationAttributes = new List<Attribute>();
-                    //    foreach (var relItem in relationObjects)
-                    //    {
-                    //        var attr = CreateAttributeFromRelationItem(relItem);
-                    //        relationAttributes.Add(attr);
-                    //    }
-                    //    relation.Add(relationAttributes);
-                    //}
-                    //relationList.Add(relation);
                 }
                 Builder.AddRelationsFromRelationList(relationList);
             }
