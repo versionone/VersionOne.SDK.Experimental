@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
@@ -9,10 +10,8 @@ using YamlDotNet.RepresentationModel;
 namespace VersionOne.Web.Plugins.Api
 {
     [Export(typeof(ITranslateApiInputToAssetXml))]
-    public class TranslateYamlInputToAssetXml : ITranslateApiInputToAssetXml
-    {
-        private readonly XmlAssetBuilder _builder = new XmlAssetBuilder();
-           
+    public class TranslateYamlInputToAssetXml : BaseTranslateApiInputToAssetXml, ITranslateApiInputToAssetXml
+    {          
         public XPathDocument Execute(string input)
         {
             var yamlDocument = new StringReader(input);
@@ -28,84 +27,75 @@ namespace VersionOne.Web.Plugins.Api
 
                 if (entry.Value is YamlMappingNode)
                 {
-                    AddRelations(name, entry);
+                    AddRelations(name, entry.Value);
                 }
                 else if (entry.Value is YamlSequenceNode)
                 {
-                    AddAttributesWithExplicitActions(entry, name);
+                    AddAttributesWithExplicitActions(name, entry.Value);
                 }
                 else if (entry.Value is YamlScalarNode)
                 {
-                    var value = entry.Value;
-                    _builder.AddAssetAttributeFromScalar(name, value);
+                    AddAttributeFromScalar(name, entry.Value);
                 }
             }
 
             return _builder.GetAssetXml();
         }
 
-        private void AddRelations(string name, KeyValuePair<YamlNode, YamlNode> entry)
+        protected override IEnumerable GetObjectItems(object obj)
         {
-            if (name.Equals("_links", StringComparison.OrdinalIgnoreCase))
-            {
-                var relationList = new RelationList();
-                var mappingNode = (entry.Value as YamlMappingNode);
-                foreach (var link in mappingNode)
-                {
-                    var relation = new Relation(link.Key.ToString());
-                    var rels = GetRelationItems(link);
-
-                    foreach (var item in rels)
-                    {
-                        var relationItems = item as YamlMappingNode;
-                        var relationAttributes = new List<Attribute>();
-                        foreach (var relItem in relationItems.Children)
-                        {
-                            var attr = new Attribute(relItem.Key.ToString(), relItem.Value);
-                            relationAttributes.Add(attr);
-                        }
-                        relation.Add(relationAttributes);
-                    }
-                    relationList.Add(relation);
-                }
-                _builder.AddRelationsFromRelationList(relationList);
-            }
+            var entry = obj as YamlMappingNode;
+            return entry;
         }
 
-        private void AddAttributesWithExplicitActions(KeyValuePair<YamlNode, YamlNode> entry, string name)
+        protected override string GetKey(object item)
         {
-            var sequence = (entry.Value as YamlSequenceNode);
-            var array = sequence.Children.Cast<object>().ToArray();
-
-            var act = array[0].ToString();
-            if (new[] { "set", "add" }.Any(a => a.Equals(act, StringComparison.OrdinalIgnoreCase)))
-            {
-                var value = array[1];
-                var attr = new Attribute(name, value, act);
-                _builder.AddAttributeFromArray(attr);
-            }
-            else if (act.Equals("remove", StringComparison.OrdinalIgnoreCase))
-            {
-                var attr = Attribute.CreateForRemove(name);
-                _builder.AddAttributeFromArray(attr);
-            }
+            var node = (KeyValuePair<YamlNode, YamlNode>)item;
+            return node.Key.ToString();
         }
 
-        private static IEnumerable<object> GetRelationItems(KeyValuePair<YamlNode, YamlNode> link)
+        protected override IEnumerable GetRelationItemEnumerable(object obj)
         {
-            var rels = new List<object>();
+            return obj as YamlMappingNode;
+        }
+
+        protected override Attribute CreateAttributeFromRelationItem(object obj)
+        {
+            var relItem = (KeyValuePair<YamlNode, YamlNode>)obj;
+            return new Attribute(relItem.Key.ToString(), relItem.Value);
+        }
+
+        protected override IEnumerable<object> GetRelationItems(object linkObj)
+        {
+            var link = (KeyValuePair<YamlNode, YamlNode>)linkObj;
+
+            var relationItems = new List<object>();
 
             if (link.Value is YamlMappingNode)
             {
                 var value = (link.Value as YamlMappingNode);
-                rels = value.Children.Cast<object>().ToList();
+                relationItems = value.Children.Cast<object>().ToList();
             }
             else if (link.Value is YamlSequenceNode)
             {
                 var value = (link.Value as YamlSequenceNode);
-                rels = value.Children.Cast<object>().ToList();
+                relationItems = value.Children.Cast<object>().ToList();
             }
-            return rels;
+            return relationItems;
+        }
+
+        protected override void AddAttributeFromScalar(string name, object scalar)
+        {
+            var obj = (YamlScalarNode) scalar;
+            var value = obj.Value;
+            _builder.AddAssetAttributeFromScalar(name, value);
+        }
+
+        protected override object[] GetArrayFromObject(object obj)
+        {
+            var pair = (YamlSequenceNode) obj;
+            var array = pair.Children.Cast<object>().ToArray();
+            return array;
         }
 
         private readonly string[] _contentTypes = new[]
