@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq;
 using System.Xml.XPath;
 
 namespace VersionOne.Web.Plugins.Api
 {
-    [Export(typeof(ITranslateApiInputToAssetXml))]
-    public abstract class BaseTranslateApiInputToAssetXml
+    public abstract class BaseTranslateApiHalInputToAssetXml
     {
         protected readonly XmlAssetBuilder Builder = new XmlAssetBuilder();
 

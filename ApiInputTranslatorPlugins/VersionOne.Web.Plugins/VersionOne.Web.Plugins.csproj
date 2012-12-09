@@ -63,11 +63,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Api\Attribute.cs" />
-    <Compile Include="Api\BaseTranslateApiInputToAssetXml.cs" />
+    <Compile Include="Api\BaseTranslateApiHalInputToAssetXml.cs" />
     <Compile Include="Api\Relation.cs" />
     <Compile Include="Api\RelationList.cs" />
-    <Compile Include="Api\TranslateYamlInputToAssetXml.cs" />
-    <Compile Include="Api\TranslateHalJsonInputToAssetXml.cs" />
+    <Compile Include="Api\TranslateHalYamlInputToAssetXml.cs" />
+    <Compile Include="Api\TranslateHalJsonHalInputToAssetXml.cs" />
     <Compile Include="Api\TranslateJsonInputToAssetXml.cs" />
     <Compile Include="Api\XmlAssetBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

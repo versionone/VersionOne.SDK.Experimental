@@ -6,7 +6,7 @@ namespace VersionOne.Web.Plugins.Tests.Api
     [TestFixture]
     public class TranslateHalJsonInputToAssetXmlTests
     {
-        private TranslateHalJsonInputToAssetXml _subject;
+        private TranslateHalJsonHalInputToAssetXml _subject;
 
         [TestCase("json", false)]
         [TestCase("    json", false)]
@@ -22,7 +22,7 @@ namespace VersionOne.Web.Plugins.Tests.Api
         [TestCase("application/hal+json     ", true)]
         public void CanProcess_supports_correct_content_types(string contentType, bool expected)
         {
-            _subject = new TranslateHalJsonInputToAssetXml();
+            _subject = new TranslateHalJsonHalInputToAssetXml();
 
             Assert.AreEqual(expected, _subject.CanTranslate(contentType), "Content-Type:" + contentType);
         }
@@ -40,7 +40,7 @@ namespace VersionOne.Web.Plugins.Tests.Api
   <Attribute name=""Name"" act=""set"">Josh</Attribute>
 </Asset>";
 
-            _subject = new TranslateHalJsonInputToAssetXml();
+            _subject = new TranslateHalJsonHalInputToAssetXml();
 
             var actual = _subject.Execute(input).CreateNavigator().OuterXml;
 
@@ -63,7 +63,7 @@ namespace VersionOne.Web.Plugins.Tests.Api
   <Attribute name=""Info"" act=""add"">newvalue</Attribute>
 </Asset>";
 
-            _subject = new TranslateHalJsonInputToAssetXml();
+            _subject = new TranslateHalJsonHalInputToAssetXml();
 
             var actual = _subject.Execute(input).CreateNavigator().OuterXml;
 
@@ -107,7 +107,7 @@ const string expected =
     <Asset idref=""Scope:0"" />
   </Relation>
 </Asset>";
-            _subject = new TranslateHalJsonInputToAssetXml();
+            _subject = new TranslateHalJsonHalInputToAssetXml();
 
             var actual = _subject.Execute(input).CreateNavigator().OuterXml;
 

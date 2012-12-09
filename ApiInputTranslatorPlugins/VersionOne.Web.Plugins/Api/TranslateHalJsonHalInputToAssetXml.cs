@@ -10,8 +10,8 @@ using Newtonsoft.Json.Linq;
 namespace VersionOne.Web.Plugins.Api
 {
     [Export(typeof(ITranslateApiInputToAssetXml))]
-    public class TranslateHalJsonInputToAssetXml :
-        BaseTranslateApiInputToAssetXml, ITranslateApiInputToAssetXml
+    public class TranslateHalJsonHalInputToAssetXml :
+        BaseTranslateApiHalInputToAssetXml, ITranslateApiInputToAssetXml
     {
         public XPathDocument Execute(string input)
         {

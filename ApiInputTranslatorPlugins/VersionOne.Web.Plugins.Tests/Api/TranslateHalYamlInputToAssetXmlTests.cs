@@ -4,9 +4,9 @@ using VersionOne.Web.Plugins.Api;
 namespace VersionOne.Web.Plugins.Tests.Api
 {
     [TestFixture]
-    public class TranslateYamlJsonInputToAssetXmlTests
+    public class TranslateHalYamlInputToAssetXmlTests
     {
-        private TranslateYamlInputToAssetXml _subject;
+        private TranslateHalYamlInputToAssetXml _subject;
 
         [TestCase("json", false)]
         [TestCase("    json", false)]
@@ -22,7 +22,7 @@ namespace VersionOne.Web.Plugins.Tests.Api
         [TestCase("application/yaml     ", true)]
         public void CanProcess_supports_correct_content_types(string contentType, bool expected)
         {
-            _subject = new TranslateYamlInputToAssetXml();
+            _subject = new TranslateHalYamlInputToAssetXml();
 
             Assert.AreEqual(expected, _subject.CanTranslate(contentType), "Content-Type:" + contentType);
         }
@@ -40,7 +40,7 @@ Name : Josh
   <Attribute name=""Name"" act=""set"">Josh</Attribute>
 </Asset>";
 
-            _subject = new TranslateYamlInputToAssetXml();
+            _subject = new TranslateHalYamlInputToAssetXml();
 
             var actual = _subject.Execute(input).CreateNavigator().OuterXml;
 
@@ -65,7 +65,7 @@ Info:   [add, new value]
   <Attribute name=""Info"" act=""add"">new value</Attribute>
 </Asset>";
 
-            _subject = new TranslateYamlInputToAssetXml();
+            _subject = new TranslateHalYamlInputToAssetXml();
 
             var actual = _subject.Execute(input).CreateNavigator().OuterXml;
 
@@ -105,7 +105,7 @@ const string expected =
   <Attribute name=""RemoveProp"" act=""remove"" />
   <Attribute name=""AddToProp"" act=""add"">Added Value</Attribute>
 </Asset>";
-            _subject = new TranslateYamlInputToAssetXml();
+            _subject = new TranslateHalYamlInputToAssetXml();
 
             var actual = _subject.Execute(input).CreateNavigator().OuterXml;
 

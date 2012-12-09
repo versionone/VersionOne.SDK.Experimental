@@ -10,7 +10,7 @@ using YamlDotNet.RepresentationModel;
 namespace VersionOne.Web.Plugins.Api
 {
     [Export(typeof(ITranslateApiInputToAssetXml))]
-    public class TranslateYamlInputToAssetXml : BaseTranslateApiInputToAssetXml, ITranslateApiInputToAssetXml
+    public class TranslateHalYamlInputToAssetXml : BaseTranslateApiHalInputToAssetXml, ITranslateApiInputToAssetXml
     {          
         public XPathDocument Execute(string input)
         {
