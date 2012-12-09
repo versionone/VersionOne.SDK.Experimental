@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Xml.XPath;
 using YamlDotNet.RepresentationModel;
 
@@ -12,15 +11,15 @@ namespace VersionOne.Web.Plugins.Api
     [Export(typeof(ITranslateApiInputToAssetXml))]
     public class TranslateYamlInputToAssetXml : ITranslateApiInputToAssetXml
     {
+        private readonly XmlAssetBuilder _builder = new XmlAssetBuilder();
+           
         public XPathDocument Execute(string input)
         {
-            var buffer = new StringBuilder();
             var yamlDocument = new StringReader(input);
 
             var yaml = new YamlStream();
             yaml.Load(yamlDocument);
 
-            // Examine the stream
             var mapping = (YamlMappingNode)yaml.Documents[0].RootNode;
 
             foreach (var entry in mapping.Children)
@@ -29,140 +28,87 @@ namespace VersionOne.Web.Plugins.Api
 
                 if (entry.Value is YamlMappingNode)
                 {
-                    if (name.Equals("_links", StringComparison.OrdinalIgnoreCase))
-                    {
-                        AddRelationsFromLinks((entry.Value as YamlMappingNode), buffer);
-                    }
+                    AddRelations(name, entry);
                 }
                 else if (entry.Value is YamlSequenceNode)
                 {
-                    var array = (entry.Value as YamlSequenceNode);
-                    var items = array.Children.Cast<object>().ToArray();
-                    AddAttributeFromArray(name, items, buffer);
+                    AddAttributesWithExplicitActions(entry, name);
                 }
                 else if (entry.Value is YamlScalarNode)
                 {
                     var value = entry.Value;
-                    AddAssetAttributeFromScalar(name, value, buffer);
+                    _builder.AddAssetAttributeFromScalar(name, value);
                 }
             }
 
-            return CreateUpdateAssetXmlFragment(buffer);
+            return _builder.GetAssetXml();
         }
 
-        private static void AddRelationsFromLinks(YamlMappingNode links, StringBuilder buffer)
+        private void AddRelations(string name, KeyValuePair<YamlNode, YamlNode> entry)
         {
-            foreach (var link in links.Children)
+            if (name.Equals("_links", StringComparison.OrdinalIgnoreCase))
             {
-                if (link.Value is YamlSequenceNode)
+                var relationList = new RelationList();
+                var mappingNode = (entry.Value as YamlMappingNode);
+                foreach (var link in mappingNode)
                 {
-                    var refItems = new List<string>();
-                    var items = (link.Value as YamlSequenceNode).Children;
-                    foreach (var item in items)
+                    var relation = new Relation(link.Key.ToString());
+                    var rels = GetRelationItems(link);
+
+                    foreach (var item in rels)
                     {
-                        var relation = item as YamlMappingNode;
-
-                        CreateRelationItemsFromToken(relation, refItems);
+                        var relationItems = item as YamlMappingNode;
+                        var relationAttributes = new List<Attribute>();
+                        foreach (var relItem in relationItems.Children)
+                        {
+                            var attr = new Attribute(relItem.Key.ToString(), relItem.Value);
+                            relationAttributes.Add(attr);
+                        }
+                        relation.Add(relationAttributes);
                     }
-                    var key = link.Key.ToString();
-                    AddRelation(buffer, key, refItems.ToArray());
+                    relationList.Add(relation);
                 }
-                else if (link.Value is YamlMappingNode)
-                {
-                    var items = new List<string>();
-                    var relation = link.Value as YamlMappingNode;
-                    CreateRelationItemsFromToken(relation, items);
-                    AddRelation(buffer, link.Key.ToString(), items.ToArray());
-                }
+                _builder.AddRelationsFromRelationList(relationList);
             }
         }
 
-        private static void CreateRelationItemsFromToken(YamlMappingNode relation,
-            List<string> items)
+        private void AddAttributesWithExplicitActions(KeyValuePair<YamlNode, YamlNode> entry, string name)
         {
-            var idref = string.Empty;
-            foreach (var item in relation.Children)
-            {
-                //if (prop.Name.Equals("href", StringComparison.OrdinalIgnoreCase))
-                if (item.Key.ToString().Equals("idref", StringComparison.OrdinalIgnoreCase))
-                {
-                    idref = item.Value.ToString();
-                    items.Add(idref);
-                }
-            }
-        }
+            var sequence = (entry.Value as YamlSequenceNode);
+            var array = sequence.Children.Cast<object>().ToArray();
 
-        private static void AddRelation(StringBuilder buffer, object relationName, string[] relationValues)
-        {
-            const string relationTemplate =
-@" <Relation name=""{0}"" act=""set"">
-  {1}
- </Relation>
-";
-            const string relationItem =
-@"
-  <Asset idref=""{0}"" />
-";
-            var buff = new StringBuilder();
-            foreach (var item in relationValues)
-            {
-                buff.Append(string.Format(relationItem, item));
-            }
-            var relation = string.Format(relationTemplate, relationName, buff.ToString());
-
-            buffer.Append(relation);
-        }
-
-        private static void AddAssetAttributeFromScalar(string name, object value, StringBuilder buffer)
-        {
-            buffer.Append(CreateAssetAttributeForUpdateOrAdd(new[] { name, "set", value.ToString() }));
-        }
-
-        private static void AddAttributeFromArray(string name, object[] array, StringBuilder buffer)
-        {
-            var attribute = string.Empty;
             var act = array[0].ToString();
-
             if (new[] { "set", "add" }.Any(a => a.Equals(act, StringComparison.OrdinalIgnoreCase)))
             {
                 var value = array[1];
-                attribute = CreateAssetAttributeForUpdateOrAdd(new[] { name, act, value });
+                var attr = new Attribute(name, value, act);
+                _builder.AddAttributeFromArray(attr);
             }
             else if (act.Equals("remove", StringComparison.OrdinalIgnoreCase))
             {
-                attribute = CreateAssetAttributeForRemove(new[] { name, act });
+                var attr = Attribute.CreateForRemove(name);
+                _builder.AddAttributeFromArray(attr);
             }
-            buffer.Append(attribute);
         }
 
-        private static XPathDocument CreateUpdateAssetXmlFragment(StringBuilder buffer)
+        private static IEnumerable<object> GetRelationItems(KeyValuePair<YamlNode, YamlNode> link)
         {
-            const string xmlAsset = "<Asset>\n{0}</Asset>";
+            var rels = new List<object>();
 
-            var xml = string.Format(xmlAsset, buffer);
-
-            using (var stringReader = new StringReader(xml))
+            if (link.Value is YamlMappingNode)
             {
-                var doc = new XPathDocument(stringReader);
-                return doc;
+                var value = (link.Value as YamlMappingNode);
+                rels = value.Children.Cast<object>().ToList();
             }
+            else if (link.Value is YamlSequenceNode)
+            {
+                var value = (link.Value as YamlSequenceNode);
+                rels = value.Children.Cast<object>().ToList();
+            }
+            return rels;
         }
 
-        private static string CreateAssetAttributeForUpdateOrAdd(IList<object> attributeDef)
-        {
-            const string xmlAttribute = /* one space */ " <Attribute name='{0}' act='{1}'>{2}</Attribute>\n";
-            var attribute = string.Format(xmlAttribute, attributeDef[0], attributeDef[1], attributeDef[2]);
-            return attribute;
-        }
-
-        private static string CreateAssetAttributeForRemove(IList<object> attributeDef)
-        {
-            const string xmlAttribute = /* one space */ " <Attribute name='{0}' act='{1}' />\n";
-            var attribute = string.Format(xmlAttribute, attributeDef[0], attributeDef[1]);
-            return attribute;
-        }
-
-        private static readonly string[] ContentTypes = new[]
+        private readonly string[] _contentTypes = new[]
             {
                 "yaml",
                 "application/yaml",
@@ -174,10 +120,11 @@ namespace VersionOne.Web.Plugins.Api
             if (!string.IsNullOrWhiteSpace(contentType))
             {
                 contentType = contentType.Trim();
-                return ContentTypes.Any(c => c.Equals(contentType, StringComparison.OrdinalIgnoreCase));
+                return _contentTypes.Any(c => c.Equals(contentType, StringComparison.OrdinalIgnoreCase));
             }
 
             return false;
         }
+
     }
 }
