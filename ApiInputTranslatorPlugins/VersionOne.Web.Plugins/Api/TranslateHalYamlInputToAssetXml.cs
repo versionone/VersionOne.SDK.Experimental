@@ -10,9 +10,9 @@ using YamlDotNet.RepresentationModel;
 namespace VersionOne.Web.Plugins.Api
 {
     [Export(typeof(ITranslateApiInputToAssetXml))]
-    public class TranslateHalYamlInputToAssetXml : BaseTranslateApiHalInputToAssetXml, ITranslateApiInputToAssetXml
+    public class TranslateHalYamlInputToAssetXml : BaseTranslateApiHalInputToAssetXml
     {          
-        public XPathDocument Execute(string input)
+        public override XPathDocument Execute(string input)
         {
             var yamlDocument = new StringReader(input);
 
@@ -105,16 +105,9 @@ namespace VersionOne.Web.Plugins.Api
                 "text/yaml"
             };
 
-        public bool CanTranslate(string contentType)
+        protected override string[] GetContentTypes()
         {
-            if (!string.IsNullOrWhiteSpace(contentType))
-            {
-                contentType = contentType.Trim();
-                return _contentTypes.Any(c => c.Equals(contentType, StringComparison.OrdinalIgnoreCase));
-            }
-
-            return false;
+            return _contentTypes;
         }
-
     }
 }

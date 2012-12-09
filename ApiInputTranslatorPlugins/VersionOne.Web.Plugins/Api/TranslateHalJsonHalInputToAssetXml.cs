@@ -13,7 +13,7 @@ namespace VersionOne.Web.Plugins.Api
     public class TranslateHalJsonHalInputToAssetXml :
         BaseTranslateApiHalInputToAssetXml, ITranslateApiInputToAssetXml
     {
-        public XPathDocument Execute(string input)
+        public override XPathDocument Execute(string input)
         {
             var jsonObject = (JObject)JsonConvert.DeserializeObject(input);
 
@@ -91,22 +91,16 @@ namespace VersionOne.Web.Plugins.Api
             Builder.AddAssetAttributeFromScalar(name, prop.Value);
         }
 
-        private static readonly string[] ContentTypes = new[]
+        private static readonly string[] _contentTypes = new[]
             {
                 "hal+json",
                 "text/hal+json",
                 "application/hal+json"
             };
 
-        public bool CanTranslate(string contentType)
+        protected override string[] GetContentTypes()
         {
-            if (!string.IsNullOrWhiteSpace(contentType))
-            {
-                contentType = contentType.Trim();
-                return ContentTypes.Any(c => c.Equals(contentType, StringComparison.OrdinalIgnoreCase));
-            }
-
-            return false;
+            return _contentTypes;
         }
     }
 }

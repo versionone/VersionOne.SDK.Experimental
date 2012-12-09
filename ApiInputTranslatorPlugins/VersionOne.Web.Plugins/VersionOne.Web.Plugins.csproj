@@ -66,6 +66,7 @@
     <Compile Include="Api\BaseTranslateApiHalInputToAssetXml.cs" />
     <Compile Include="Api\Relation.cs" />
     <Compile Include="Api\RelationList.cs" />
+    <Compile Include="Api\TranslateAssetXmlOutputToHalJson.cs" />
     <Compile Include="Api\TranslateHalYamlInputToAssetXml.cs" />
     <Compile Include="Api\TranslateHalJsonHalInputToAssetXml.cs" />
     <Compile Include="Api\TranslateJsonInputToAssetXml.cs" />

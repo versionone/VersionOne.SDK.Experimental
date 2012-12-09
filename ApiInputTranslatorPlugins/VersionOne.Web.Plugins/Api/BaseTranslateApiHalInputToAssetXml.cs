@@ -6,8 +6,23 @@ using System.Xml.XPath;
 
 namespace VersionOne.Web.Plugins.Api
 {
-    public abstract class BaseTranslateApiHalInputToAssetXml
+    public abstract class BaseTranslateApiHalInputToAssetXml : ITranslateApiInputToAssetXml
     {
+        protected abstract string[] GetContentTypes();
+
+        public bool CanTranslate(string contentType)
+        {
+            if (!string.IsNullOrWhiteSpace(contentType))
+            {
+                contentType = contentType.Trim();
+                return GetContentTypes().Any(c => c.Equals(contentType, StringComparison.OrdinalIgnoreCase));
+            }
+
+            return false;
+        }
+
+        public abstract XPathDocument Execute(string input);
+
         protected readonly XmlAssetBuilder Builder = new XmlAssetBuilder();
 
         protected void AddRelationsFromLinks(string name, object links)
