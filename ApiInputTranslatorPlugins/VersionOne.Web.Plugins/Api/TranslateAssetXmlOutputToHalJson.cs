@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Xml.XPath;
@@ -6,6 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace VersionOne.Web.Plugins.Api
 {
+    [Export(typeof(ITranslateAssetXmlOutputToContentType))]
     public class TranslateAssetXmlOutputToHalJson : ITranslateAssetXmlOutputToContentType
     {
         private static readonly string[] ContentTypes = new[]
