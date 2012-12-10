@@ -39,7 +39,7 @@ All you have to do is implement one of those interfaces and then add the binary 
 
 Once you've written and compiled the translator plugin, simply add a copy of it, and any referenced DLLs it needs, to the `bin\Plugins` folder of your VersionOne instance.
 
-# Built-In Plugins Suppoting HAL-compliant JSON and YAML
+# Built-In Plugins Supporting HAL-compliant JSON and YAML
 
 We've implemented a few built-in plugins that you can take advantage of already. These plugins utilize Hypertext Application Language format, HAL, as the basis of both input and output, as described next.
 
