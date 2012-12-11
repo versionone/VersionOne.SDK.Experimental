@@ -62,8 +62,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Api\ApiTranslatorFilter.cs" />
-    <Compile Include="Api\ApiTranslatorPluginsFactory.cs" />
     <Compile Include="Api\Attribute.cs" />
     <Compile Include="Api\BaseTranslateApiHalInputToAssetXml.cs" />
     <Compile Include="Api\Relation.cs" />

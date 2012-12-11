@@ -40,6 +40,7 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -47,6 +48,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Api\ApiTranslatorFilter.cs" />
+    <Compile Include="Api\ApiTranslatorFilterModule.cs" />
+    <Compile Include="Api\ApiTranslatorPluginsFactory.cs" />
     <Compile Include="Api\IContentTypeHandler.cs" />
     <Compile Include="Api\ITranslateApiInputToAssetXml.cs" />
     <Compile Include="Api\ITranslateAssetXmlOutputToContentType.cs" />

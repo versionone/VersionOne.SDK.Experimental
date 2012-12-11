@@ -2,29 +2,9 @@
 using System.IO;
 using System.Text;
 using System.Web;
-using System.Xml.XPath;
-using VersionOne.Web.Plugins.Composition;
 
 namespace VersionOne.Web.Plugins.Api
 {
-    public class ApiTranslatorFiltersModule : IHttpModule
-    {
-        public void Dispose()
-        {
-        }
-
-        public void Init(HttpApplication context)
-        {
-            context.BeginRequest += context_BeginRequest;
-        }
-
-        void context_BeginRequest(object sender, EventArgs e)
-        {
-            HttpContext.Current.Request.Filter =
-                new ApiInputTranslatorFilter(HttpContext.Current.Request.Filter);
-        }
-    }
-
     public class ApiInputTranslatorFilter : Stream
     {
         private readonly Stream _sink;
@@ -32,32 +12,6 @@ namespace VersionOne.Web.Plugins.Api
         public ApiInputTranslatorFilter(Stream sink)
         {
             _sink = sink;
-        }
-
-        public override bool CanRead
-        {
-            get { return true; }
-        }
-
-        public override bool CanSeek
-        {
-            get { return false; }
-        }
-
-        public override bool CanWrite
-        {
-            get { return false; }
-        }
-
-        public override long Length
-        {
-            get { return _sink.Length; }
-        }
-
-        public override long Position
-        {
-            get { return _sink.Position; }
-            set { throw new NotSupportedException(); }
         }
 
         private bool _hasAttemptedReadAndTranslation;
@@ -71,7 +25,7 @@ namespace VersionOne.Web.Plugins.Api
                 var translator = GetInputTranslatorByContentType();
                 if (translator == null)
                 {
-                    return _sink.Read(buffer, offset, byteCountToRead);
+                    return ReadFromWrappedStream(buffer, offset, byteCountToRead);
                 }
                 var originalContent = string.Empty;
                 using (var streamReader = new StreamReader(_sink))
@@ -101,16 +55,11 @@ namespace VersionOne.Web.Plugins.Api
             { // Coming back for more data...
                 if (string.IsNullOrWhiteSpace(_translatedContent))
                 {
-                    return _sink.Read(buffer, offset, byteCountToRead);
+                    return ReadFromWrappedStream(buffer, offset, byteCountToRead);
                 }
                 else
                 {
-                    var lenDiff = (_translatedContent.Length - byteCountToRead -
-                                   _nextOffsetInTranslatedContentToReadFrom);
-                    if (lenDiff < 0)
-                    {
-                        byteCountToRead = _translatedContent.Length - _nextOffsetInTranslatedContentToReadFrom;
-                    }
+                    byteCountToRead = CalculateByteCountToReadFromTranslatedContent(byteCountToRead);
 
                     if (byteCountToRead == 0)
                     {
@@ -129,6 +78,11 @@ namespace VersionOne.Web.Plugins.Api
             }
         }
 
+        private int ReadFromWrappedStream(byte[] buffer, int offset, int byteCountToRead)
+        {
+            return _sink.Read(buffer, offset, byteCountToRead);
+        }
+
         private ITranslateApiInputToAssetXml GetInputTranslatorByContentType()
         {
             _hasAttemptedReadAndTranslation = true;
@@ -138,6 +92,43 @@ namespace VersionOne.Web.Plugins.Api
 
             return ApiTranslatorPluginsFactory.GetPluginForContentType
                 <ITranslateApiInputToAssetXml>(contentType);
+        }
+
+        private int CalculateByteCountToReadFromTranslatedContent(int byteCountToRead)
+        {
+            var lenDiff = (_translatedContent.Length - byteCountToRead -
+                           _nextOffsetInTranslatedContentToReadFrom);
+            if (lenDiff < 0)
+            {
+                byteCountToRead = _translatedContent.Length - _nextOffsetInTranslatedContentToReadFrom;
+            }
+            return byteCountToRead;
+        }
+
+        public override bool CanRead
+        {
+            get { return true; }
+        }
+
+        public override bool CanSeek
+        {
+            get { return false; }
+        }
+
+        public override bool CanWrite
+        {
+            get { return false; }
+        }
+
+        public override long Length
+        {
+            get { return _sink.Length; }
+        }
+
+        public override long Position
+        {
+            get { return _sink.Position; }
+            set { throw new NotSupportedException(); }
         }
 
         public override long Seek(long offset, System.IO.SeekOrigin direction)
