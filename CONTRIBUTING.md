@@ -1,16 +1,33 @@
-# Contributing VersionOne API Input & Output Translator Plugins
+# Using and Contributing VersionOne API Input & Output Translator Plugins
 
 VersionOne's core HTTP API accepts and produces Asset XML documents in response to incoming queries and commands. The API has been stable for a number of years.
 
-Read more about the [VersionOne Core Data API](http://community.versionone.com/sdk/Documentation/DataAPI.aspx) if you'd like more background information.
+Read more about the [VersionOne Core Data API](http://community.versionone.com/sdk/Documentation/DataAPI.aspx) for detailed information.
 
 ## Lighter Alternatives to XML Needed
 
 But, XML is a very verbose and heavy syntax for data exchange. Alternative formats, such as [JSON](http://en.wikipedia.org/wiki/JSON) (JavaScript Object Notation) and [YAML](http://en.wikipedia.org/wiki/YAML) (YAML Ain't Markup Language) have become more popular in recent years.
 
+## Offering Easier Integration
+
 To enable easier integration with external programs and even within VersionOne's core product, we're adding a mechanism for contributing **VersionOne API Input & Output Translator Plugins**.
 
-These plugins are very simple to author and add to VersionOne. An **API Input Translator Plugin** is passed a string and must produce an `XPathDocument` result that conforms to the [VersionOne Core API XML format](http://community.versionone.com/sdk/Documentation/DataAPI.aspx). Similarly, an **API Output Translator Plugin** is passesd a complete Asset XML document and must translate it to an alternative output.
+# Enabling API Plugins in VersionOne
+
+Thankfully, adding API plugin support does not require a new build of the VersionOne application. Instead, it is as easy as:
+
+* Place `VersionOne.Web.Api.Plugins.Interfaces.dll` inside the `bin` folder of your installation.
+* Place one ore more compiled plugins inside the `bin\Plugins` folder. -- *VersionOne makes available `VersionOne.Web.Api.Plugins.dll` with two translators which you can read more about below.*
+* Lastly, add an entry for the `ApiTranslatorFilterModule` to your `web.config` file in your VersionOne installation directory:
+
+```xml
+<system.web>
+...
+  <httpModules>
+    <add name="ApiTranslatorFilterModule" type="VersionOne.Web.Plugins.Api.ApiTranslatorFilterModule, VersionOne.Web.Plugins.Interfaces" /> \
+  </httpModules>
+</system.web>
+```
 
 # How To Implement VersionOne API Input & Output Translator Plugins
 
@@ -20,20 +37,22 @@ Two interfaces in [VersionOne.SDK.Experimental](https://github.com/versionone/ve
 `ITranslateAssetXmlOutputToContentType` defines a contract for translating the Asset Xml output into a different output format.
 
 ```c#
-public interface ITranslateApiInputToAssetXml
+public interface ITranslateApiInputToAssetXml : IContentTypeHandler
 {
-    bool CanTranslate(string contentType);
+    bool CanTranslate(string contentType); // from IContentTypeHandler
     XPathDocument Execute(string input);
 }
 
-public interface ITranslateAssetXmlOutputToContentType
+public interface ITranslateAssetXmlOutputToContentType : IContentTypeHandler
 {
-    bool CanTranslate(string contentType);
+    bool CanHandle(string contentType); // from IContentTypeHandler
     string Execute(string input);
 }
 ```
 
 All you have to do is implement one of those interfaces and then add the binary assembly to application, described next, for VersionOne to recognize the plugin.
+
+These plugins are very simple to author and add to VersionOne. An **API Input Translator Plugin** is passed a string and must produce an `XPathDocument` result that conforms to the [VersionOne Core API XML format](http://community.versionone.com/sdk/Documentation/DataAPI.aspx). Similarly, an **API Output Translator Plugin** is passesd a complete Asset XML document and must translate it to an alternative output.
 
 ## Installing an API Plugin
 
