@@ -10,7 +10,7 @@ namespace VersionOne.Web.Plugins.Api
     {
         protected abstract string[] GetContentTypes();
 
-        public bool CanTranslate(string contentType)
+        public bool CanHandle(string contentType)
         {
             if (!string.IsNullOrWhiteSpace(contentType))
             {

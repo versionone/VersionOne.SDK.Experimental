@@ -19,7 +19,7 @@ namespace VersionOne.Web.Plugins.Tests.Api
         {
             _subject = new TranslateJsonInputToAssetXml();
 
-            Assert.AreEqual(expected, _subject.CanTranslate(contentType), "Content-Type:" + contentType);
+            Assert.AreEqual(expected, _subject.CanHandle(contentType), "Content-Type:" + contentType);
         }
 
         [Test]

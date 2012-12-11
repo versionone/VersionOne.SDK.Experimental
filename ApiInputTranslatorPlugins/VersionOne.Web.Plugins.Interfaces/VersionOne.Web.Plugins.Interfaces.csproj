@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Api\IContentTypeHandler.cs" />
     <Compile Include="Api\ITranslateApiInputToAssetXml.cs" />
     <Compile Include="Api\ITranslateAssetXmlOutputToContentType.cs" />
     <Compile Include="Composition\PartsAssembler.cs" />

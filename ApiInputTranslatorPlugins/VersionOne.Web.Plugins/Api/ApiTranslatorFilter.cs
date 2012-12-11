@@ -27,7 +27,7 @@ namespace VersionOne.Web.Plugins.Api
 
     public class ApiInputTranslatorFilter : Stream
     {
-        private Stream _sink;
+        private readonly Stream _sink;
 
         public ApiInputTranslatorFilter(Stream sink)
         {
@@ -51,7 +51,7 @@ namespace VersionOne.Web.Plugins.Api
 
         public override long Length
         {
-            get { return _newBuffer.Length; }
+            get { return _sink.Length; }
         }
 
         public override long Position
@@ -60,71 +60,84 @@ namespace VersionOne.Web.Plugins.Api
             set { throw new NotSupportedException(); }
         }
 
-        private byte[] _newBuffer = new byte[] { };
+        private bool _hasAttemptedReadAndTranslation;
+        private string _translatedContent;
+        private int _nextOffsetInTranslatedContentToReadFrom = 0;
 
-        /*
-         * In the case where the input stream total is less than 8092,
-         * then I think this will work fine.
-         * 
-         * If it's greater, we might be able to read the entire InputStream
-         * into a MemoryStream, process it in one swoop, but then
-         * chunk out the translated result in multiple reads???
-         * 
-         * 
-         */
-
-        private ITranslateApiInputToAssetXml GetTranslatorForContentType(string contentType)
+        public override int Read(byte[] buffer, int offset, int byteCountToRead)
         {
-            var path = HttpContext.Current.Server.MapPath("bin\\Plugins");
-            var inputStreamTranslators = new PartsList<ITranslateApiInputToAssetXml>(path);
-
-            foreach (var translator in inputStreamTranslators.Items)
+            if (!_hasAttemptedReadAndTranslation)
             {
-                if (translator.CanTranslate(contentType))
+                var translator = GetInputTranslatorByContentType();
+                if (translator == null)
                 {
-                    return translator;
+                    return _sink.Read(buffer, offset, byteCountToRead);
+                }
+                var originalContent = string.Empty;
+                using (var streamReader = new StreamReader(_sink))
+                {
+                    originalContent = streamReader.ReadToEnd();
+                }
+
+                // TODO: should just return string instead of XML doc.
+                // Makes it lighter weight on the plugin side, since 
+                // it will likely just use a StringBuilder to create the XML
+                // anyway.
+                var xml = translator.Execute(originalContent);
+                _translatedContent = xml.CreateNavigator().OuterXml;
+
+                var translatedContentLength = _translatedContent.Length;
+                if (translatedContentLength < byteCountToRead)
+                {
+                    byteCountToRead = translatedContentLength;
+                }
+                Encoding.UTF8.GetBytes(_translatedContent, 0, byteCountToRead, buffer, 0);
+
+                _nextOffsetInTranslatedContentToReadFrom = byteCountToRead;
+
+                return byteCountToRead;
+            }
+            else
+            { // Coming back for more data...
+                if (string.IsNullOrWhiteSpace(_translatedContent))
+                {
+                    return _sink.Read(buffer, offset, byteCountToRead);
+                }
+                else
+                {
+                    var lenDiff = (_translatedContent.Length - byteCountToRead -
+                                   _nextOffsetInTranslatedContentToReadFrom);
+                    if (lenDiff < 0)
+                    {
+                        byteCountToRead = _translatedContent.Length - _nextOffsetInTranslatedContentToReadFrom;
+                    }
+
+                    if (byteCountToRead == 0)
+                    {
+                        return 0;
+                    }
+
+                    var segment = _translatedContent.Substring(_nextOffsetInTranslatedContentToReadFrom,
+                                                               byteCountToRead);
+
+                    Encoding.UTF8.GetBytes(segment, 0, byteCountToRead, buffer, 0);
+
+                    _nextOffsetInTranslatedContentToReadFrom += byteCountToRead;
+
+                    return byteCountToRead;
                 }
             }
-            return null;
         }
 
-        public override int Read(byte[] buffer, int offset, int count)
+        private ITranslateApiInputToAssetXml GetInputTranslatorByContentType()
         {
-            var bytesRead = _sink.Read(buffer, offset, count);
-            if (bytesRead == 0)
-            {
-                return 0;
-            }
+            _hasAttemptedReadAndTranslation = true;
 
             var context = HttpContext.Current;
             var contentType = context.Request.Headers["Content-Type"];
 
-            var translator = GetTranslatorForContentType(contentType);
-            if (translator != null)
-            {
-                var content = Encoding.UTF8.GetString(buffer, offset, bytesRead);
-
-                var xml = translator.Execute(content);
-
-                var translatedContent = xml.CreateNavigator().OuterXml;
-
-                _newBuffer = Encoding.UTF8.GetBytes(translatedContent);
-                var newBufferByteCountLength = Encoding.UTF8.GetByteCount(translatedContent);
-
-                Encoding.UTF8.GetBytes(translatedContent,
-                                       0, newBufferByteCountLength, buffer, 0);
-
-                //if (newBufferByteCountLength > bytesRead)
-                //{
-                //    _sink.Position = newBufferByteCountLength;
-                //}
-
-                return newBufferByteCountLength;
-            }
-            else
-            {
-                return bytesRead;
-            }
+            return ApiTranslatorPluginsFactory.GetPluginForContentType
+                <ITranslateApiInputToAssetXml>(contentType);
         }
 
         public override long Seek(long offset, System.IO.SeekOrigin direction)

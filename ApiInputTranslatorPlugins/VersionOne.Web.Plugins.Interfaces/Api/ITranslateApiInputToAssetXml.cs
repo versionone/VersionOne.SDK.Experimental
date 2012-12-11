@@ -2,9 +2,8 @@
 
 namespace VersionOne.Web.Plugins.Api
 {
-    public interface ITranslateApiInputToAssetXml
+    public interface ITranslateApiInputToAssetXml : IContentTypeHandler
     {
-        bool CanTranslate(string contentType);
         XPathDocument Execute(string input);
     }
 }

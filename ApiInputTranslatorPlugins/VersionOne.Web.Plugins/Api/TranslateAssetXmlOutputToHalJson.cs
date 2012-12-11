@@ -22,7 +22,7 @@ namespace VersionOne.Web.Plugins.Api
             return ContentTypes;
         }
 
-        public bool CanTranslate(string contentType)
+        public bool CanHandle(string contentType)
         {
             if (!string.IsNullOrWhiteSpace(contentType))
             {

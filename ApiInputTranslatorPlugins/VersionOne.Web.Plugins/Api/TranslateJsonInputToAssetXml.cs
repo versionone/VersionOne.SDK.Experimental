@@ -143,7 +143,7 @@ namespace VersionOne.Web.Plugins.Api
                 "application/json"
             };
 
-        public bool CanTranslate(string contentType)
+        public bool CanHandle(string contentType)
         {
             if (!string.IsNullOrWhiteSpace(contentType))
             {

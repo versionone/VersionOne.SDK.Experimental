@@ -1,10 +1,7 @@
-﻿using System.Xml.XPath;
-
-namespace VersionOne.Web.Plugins.Api
+﻿namespace VersionOne.Web.Plugins.Api
 {
-    public interface ITranslateAssetXmlOutputToContentType
+    public interface ITranslateAssetXmlOutputToContentType : IContentTypeHandler
     {
-        bool CanTranslate(string contentType);
         string Execute(string input);
     }
 }
