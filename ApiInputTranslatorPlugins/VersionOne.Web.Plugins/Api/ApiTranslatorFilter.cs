@@ -20,8 +20,10 @@ namespace VersionOne.Web.Plugins.Api
         void context_BeginRequest(object sender, EventArgs e)
         {
             //HttpContext.Current.Request.Filter = new ApiInputTranslatorFilter(HttpContext.Current.Request.Filter);
-            //HttpContext.Current.Request.Filter = new ApiInputTranslatorFilter(HttpContext.Current.Request.Filter);
-            HttpContext.Current.Request.Filter = new QQQ2(HttpContext.Current.Request.Filter);
+            HttpContext.Current.Request.Filter = new ApiInputTranslatorFilter(HttpContext.Current.Request.Filter);
+
+            //HttpContext.Current.Request.
+            //HttpContext.Current.Request.Filter = new QQQ2(HttpContext.Current.Request.Filter);
         }
     }
 
@@ -51,7 +53,10 @@ namespace VersionOne.Web.Plugins.Api
 
         public override long Length
         {
-            get { return _newBuffer.Length; }
+            get
+            {
+                return _newBuffer.Length;
+            }
 //            get { return _sink.Length; }
         }
 
@@ -61,7 +66,7 @@ namespace VersionOne.Web.Plugins.Api
             set { throw new NotSupportedException(); }
         }
 
-        private byte[] _newBuffer;
+        private byte[] _newBuffer = new byte[] {};
 
         public override int Read(byte[] buffer, int offset, int count)
         {
@@ -72,20 +77,22 @@ namespace VersionOne.Web.Plugins.Api
             {
                 var bytesRead = _sink.Read(buffer, offset, count);
 
-                var orgContent = Encoding.UTF8.GetString(buffer,
-                                                         offset, bytesRead);
+                if (bytesRead == 0)
+                    return 0;
 
-                //var newContent = orgContent.ToUpper();
+                //var orgContent = Encoding.UTF8.GetString(buffer,
+                //                                         offset, bytesRead);
+
                 var newContent =
 @"<Asset>
-	<Attribute name=""Phone"" act=""set"">The Phone is Always the Same</Attribute>
+	<Attribute name=""Phone"" act=""set"">777-666-</Attribute>
 </Asset>";
 
                 _newBuffer = Encoding.UTF8.GetBytes(newContent);
                 var newBufferByteCountLength = Encoding.UTF8.GetByteCount(newContent);
 
                 Encoding.UTF8.GetBytes(newContent,
-                                       0, Encoding.UTF8.GetByteCount(newContent), _newBuffer, 0);
+                                       0, Encoding.UTF8.GetByteCount(newContent), buffer, 0);
 
                 return newBufferByteCountLength;
             } 
