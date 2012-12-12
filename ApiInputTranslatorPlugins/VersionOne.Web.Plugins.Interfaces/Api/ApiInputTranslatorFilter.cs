@@ -33,10 +33,6 @@ namespace VersionOne.Web.Plugins.Api
                     originalContent = streamReader.ReadToEnd();
                 }
 
-                // TODO: should just return string instead of XML doc.
-                // Makes it lighter weight on the plugin side, since 
-                // it will likely just use a StringBuilder to create the XML
-                // anyway.
                 _translatedContent = translator.Execute(originalContent);
 
                 var translatedContentLength = _translatedContent.Length;
@@ -51,7 +47,8 @@ namespace VersionOne.Web.Plugins.Api
                 return byteCountToRead;
             }
             else
-            { // Coming back for more data...
+            {   // Coming back for more data, so read data from the already translated content into the
+                // buffer in right-sized chunks.
                 if (string.IsNullOrWhiteSpace(_translatedContent))
                 {
                     return ReadFromWrappedStream(buffer, offset, byteCountToRead);
