@@ -97,17 +97,13 @@ namespace VersionOne.Web.Plugins.Api
 
         private static void AddRelationItems(JArray relatedAssets, JObject relations, string relationName)
         {
-            if (relatedAssets.Count > 1)
+            if (relatedAssets.Count > 0)
             {
                 relations.Add(relationName, relatedAssets);
             }
-            else if (relatedAssets.Count == 1)
-            {
-                relations.Add(relationName, relatedAssets[0]);
-            }
             else
             {
-                relations.Add(relationName, new JObject());
+                relations.Add(relationName, new JArray());
             }
         }
     }

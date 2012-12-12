@@ -45,11 +45,13 @@ namespace VersionOne.Web.Plugins.Tests.Api
       ""href"": ""/versionone.web/rest-1.v1/Data/Member/20"",
       ""id"": ""Member:20""
     },
-    ""SecurityScope"": {},
-    ""DefaultRole"": {
-      ""href"": ""/versionone.web/rest-1.v1/Data/Role/1"",
-      ""idref"": ""Role:1""
-    }
+    ""SecurityScope"": [],
+    ""DefaultRole"": [
+      {
+        ""href"": ""/versionone.web/rest-1.v1/Data/Role/1"",
+        ""idref"": ""Role:1""
+      }
+    ]
   }
 }";
             var actual = _subject.Execute(AssetExample);
