@@ -42,7 +42,7 @@ namespace VersionOne.Web.Plugins.Tests.Api
 
             _subject = new TranslateHalJsonHalInputToAssetXml();
 
-            var actual = _subject.Execute(input).CreateNavigator().OuterXml;
+            var actual = _subject.Execute(input);
 
             Assert.AreEqual(expected, actual);
         }
@@ -65,7 +65,7 @@ namespace VersionOne.Web.Plugins.Tests.Api
 
             _subject = new TranslateHalJsonHalInputToAssetXml();
 
-            var actual = _subject.Execute(input).CreateNavigator().OuterXml;
+            var actual = _subject.Execute(input);
 
             Assert.AreEqual(expected, actual);
         }
@@ -80,7 +80,7 @@ namespace VersionOne.Web.Plugins.Tests.Api
     URL:""http://jgough/apiservice/commits.html?id=1"",
     OnMenu:true,
     RemoveProp:[""remove""],
-    AddToProp:[""add"",""addedValue""],
+    AddToProp:[""add"",""Added Value""],
     _links: {
         ""Asset"":
             [
@@ -98,7 +98,7 @@ const string expected =
   <Attribute name=""URL"" act=""set"">http://jgough/apiservice/commits.html?id=1</Attribute>
   <Attribute name=""OnMenu"" act=""set"">True</Attribute>
   <Attribute name=""RemoveProp"" act=""remove"" />
-  <Attribute name=""AddToProp"" act=""add"">addedValue</Attribute>
+  <Attribute name=""AddToProp"" act=""add"">Added Value</Attribute>
   <Relation name=""Asset"" act=""set"">
     <Asset idref=""Story:1082"" />
     <Asset idref=""Story:9090"" />
@@ -109,7 +109,7 @@ const string expected =
 </Asset>";
             _subject = new TranslateHalJsonHalInputToAssetXml();
 
-            var actual = _subject.Execute(input).CreateNavigator().OuterXml;
+            var actual = _subject.Execute(input);
 
             Assert.AreEqual(expected, actual);
         }

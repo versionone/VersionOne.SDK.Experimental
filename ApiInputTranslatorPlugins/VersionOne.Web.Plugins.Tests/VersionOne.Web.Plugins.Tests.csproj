@@ -51,7 +51,6 @@
     <Compile Include="Api\TranslateHalYamlInputToAssetXmlTests.cs" />
     <Compile Include="Api\TranslateHalJsonInputToAssetXmlTests.cs" />
     <Compile Include="Api\TranslateAssetXmlOutputToHalJsonTests.cs" />
-    <Compile Include="Api\TranslateJsonInputToAssetXmlTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

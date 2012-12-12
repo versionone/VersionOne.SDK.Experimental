@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
-using System.Xml.XPath;
 using YamlDotNet.RepresentationModel;
 
 namespace VersionOne.Web.Plugins.Api
@@ -12,7 +10,7 @@ namespace VersionOne.Web.Plugins.Api
     [Export(typeof(ITranslateApiInputToAssetXml))]
     public class TranslateHalYamlInputToAssetXml : BaseTranslateApiHalInputToAssetXml
     {          
-        public override XPathDocument Execute(string input)
+        public override string Execute(string input)
         {
             var yamlDocument = new StringReader(input);
 

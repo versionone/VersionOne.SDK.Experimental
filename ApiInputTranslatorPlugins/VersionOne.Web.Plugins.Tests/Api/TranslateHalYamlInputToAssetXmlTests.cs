@@ -42,7 +42,7 @@ Name : Josh
 
             _subject = new TranslateHalYamlInputToAssetXml();
 
-            var actual = _subject.Execute(input).CreateNavigator().OuterXml;
+            var actual = _subject.Execute(input);
 
             Assert.AreEqual(expected, actual);
         }
@@ -67,7 +67,7 @@ Info:   [add, new value]
 
             _subject = new TranslateHalYamlInputToAssetXml();
 
-            var actual = _subject.Execute(input).CreateNavigator().OuterXml;
+            var actual = _subject.Execute(input);
 
             Assert.AreEqual(expected, actual);
         }
@@ -107,7 +107,7 @@ const string expected =
 </Asset>";
             _subject = new TranslateHalYamlInputToAssetXml();
 
-            var actual = _subject.Execute(input).CreateNavigator().OuterXml;
+            var actual = _subject.Execute(input);
 
             Assert.AreEqual(expected, actual);
         }

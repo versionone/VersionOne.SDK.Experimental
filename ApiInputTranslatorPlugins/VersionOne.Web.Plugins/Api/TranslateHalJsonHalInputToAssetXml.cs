@@ -13,7 +13,7 @@ namespace VersionOne.Web.Plugins.Api
     public class TranslateHalJsonHalInputToAssetXml :
         BaseTranslateApiHalInputToAssetXml, ITranslateApiInputToAssetXml
     {
-        public override XPathDocument Execute(string input)
+        public override string Execute(string input)
         {
             var jsonObject = (JObject)JsonConvert.DeserializeObject(input);
 

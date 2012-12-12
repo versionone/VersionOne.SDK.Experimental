@@ -21,7 +21,7 @@ namespace VersionOne.Web.Plugins.Api
             return false;
         }
 
-        public abstract XPathDocument Execute(string input);
+        public abstract string Execute(string input);
 
         protected readonly XmlAssetBuilder Builder = new XmlAssetBuilder();
 
@@ -82,7 +82,7 @@ namespace VersionOne.Web.Plugins.Api
 
         protected abstract void AddAttributeFromScalarProperty(string name, object scalar);
 
-        protected XPathDocument GetAssetXml()
+        protected string GetAssetXml()
         {
             return Builder.GetAssetXml();
         }

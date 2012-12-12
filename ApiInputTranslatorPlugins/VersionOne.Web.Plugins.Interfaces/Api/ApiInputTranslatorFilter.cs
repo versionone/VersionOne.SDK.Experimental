@@ -37,8 +37,7 @@ namespace VersionOne.Web.Plugins.Api
                 // Makes it lighter weight on the plugin side, since 
                 // it will likely just use a StringBuilder to create the XML
                 // anyway.
-                var xml = translator.Execute(originalContent);
-                _translatedContent = xml.CreateNavigator().OuterXml;
+                _translatedContent = translator.Execute(originalContent);
 
                 var translatedContentLength = _translatedContent.Length;
                 if (translatedContentLength < byteCountToRead)

@@ -48,7 +48,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Api\ApiTranslatorFilter.cs" />
+    <Compile Include="Api\ApiOutputTranslatorFilter.cs" />
+    <Compile Include="Api\ApiInputTranslatorFilter.cs" />
     <Compile Include="Api\ApiTranslatorFilterModule.cs" />
     <Compile Include="Api\ApiTranslatorPluginsFactory.cs" />
     <Compile Include="Api\IContentTypeHandler.cs" />

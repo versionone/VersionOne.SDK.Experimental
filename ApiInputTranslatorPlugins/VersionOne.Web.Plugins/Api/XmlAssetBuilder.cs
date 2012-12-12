@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
-using System.Xml.XPath;
 
 namespace VersionOne.Web.Plugins.Api
 {
@@ -36,13 +34,11 @@ namespace VersionOne.Web.Plugins.Api
         private void AddRelation(string relationName, IEnumerable<string> relationValues)
         {
             const string relationTemplate =
-@" <Relation name=""{0}"" act=""set"">
-  {1}
- </Relation>
-";
+@"  <Relation name=""{0}"" act=""set"">
+{1}  </Relation>
+"; // <-- bizarre looking, gets filled in with new lines before it
             const string relationItem =
-@"
-  <Asset idref=""{0}"" />
+@"    <Asset idref=""{0}"" />
 ";
             var buff = new StringBuilder();
             foreach (var item in relationValues)
@@ -75,29 +71,25 @@ namespace VersionOne.Web.Plugins.Api
             GetBuffer().Append(attribute);
         }
 
-        public XPathDocument GetAssetXml()
+        public string GetAssetXml()
         {
-            const string xmlAsset = "<Asset>\n{0}</Asset>";
+            const string xmlAsset = "<Asset>\r\n{0}</Asset>";
 
             var xml = string.Format(xmlAsset, GetBuffer());
 
-            using (var stringReader = new StringReader(xml))
-            {
-                var doc = new XPathDocument(stringReader);
-                return doc;
-            }
+            return xml;
         }
 
         private string CreateAssetAttributeForUpdateOrAdd(IList<object> attributeDef)
         {
-            const string xmlAttribute = /* one space */ " <Attribute name='{0}' act='{1}'>{2}</Attribute>\n";
+            const string xmlAttribute =  "  <Attribute name=\"{0}\" act=\"{1}\">{2}</Attribute>\r\n";
             var attribute = string.Format(xmlAttribute, attributeDef[0], attributeDef[1], attributeDef[2]);
             return attribute;
         }
 
         private string CreateAssetAttributeForRemove(IList<object> attributeDef)
         {
-            const string xmlAttribute = /* one space */ " <Attribute name='{0}' act='{1}' />\n";
+            const string xmlAttribute = "  <Attribute name=\"{0}\" act=\"{1}\" />\r\n";
             var attribute = string.Format(xmlAttribute, attributeDef[0], attributeDef[1]);
             return attribute;
         }

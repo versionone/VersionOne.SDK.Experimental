@@ -18,6 +18,9 @@ namespace VersionOne.Web.Plugins.Api
         {
             HttpContext.Current.Request.Filter =
                 new ApiInputTranslatorFilter(HttpContext.Current.Request.Filter);
+
+            HttpContext.Current.Response.Filter =
+                new ApiOutputTranslatorFilter(HttpContext.Current.Response.Filter);
         }
     }
 }
