@@ -51,6 +51,7 @@ namespace VersionOne.Web.Plugins.Api
             if (!string.IsNullOrWhiteSpace(queryAcceptType))
             {
                 acceptTypes.Add(queryAcceptType);
+                HttpContext.Current.Response.ContentType = queryAcceptType;
             }
 
             return ApiTranslatorPluginsFactory.GetPluginForAcceptTypes
