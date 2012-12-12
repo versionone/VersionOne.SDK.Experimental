@@ -40,7 +40,7 @@ Two interfaces in [VersionOne.SDK.Experimental](https://github.com/versionone/ve
 public interface ITranslateApiInputToAssetXml : IContentTypeHandler
 {
     bool CanHandle(string contentType); // from IContentTypeHandler
-    strinng Execute(string input);
+    string Execute(string input);
 }
 
 public interface ITranslateAssetXmlOutputToContentType : IContentTypeHandler
