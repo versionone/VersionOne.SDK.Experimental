@@ -16,8 +16,8 @@ To enable easier integration with external programs and even within VersionOne's
 
 Thankfully, adding API plugin support does not require a new build of the VersionOne application. Instead, it is as easy as:
 
-* Place `VersionOne.Web.Api.Plugins.Interfaces.dll` inside the `bin` folder of your installation.
-* Place one ore more compiled plugins inside the `bin\Plugins` folder. -- *VersionOne makes available `VersionOne.Web.Api.Plugins.dll` with two translators which you can read more about below.*
+* Place `VersionOne.Web.Plugins.Interfaces.dll` inside the `bin` folder of your installation.
+* Place one ore more compiled plugins inside the `bin\Plugins` folder. -- *VersionOne makes available `VersionOne.Web.Plugins.dll` with two translators which you can read more about below.*
 * Lastly, add an entry for the `ApiTranslatorFilterModule` to your `web.config` file in your VersionOne installation directory:
 
 ```xml
@@ -39,8 +39,8 @@ Two interfaces in [VersionOne.SDK.Experimental](https://github.com/versionone/ve
 ```c#
 public interface ITranslateApiInputToAssetXml : IContentTypeHandler
 {
-    bool CanTranslate(string contentType); // from IContentTypeHandler
-    XPathDocument Execute(string input);
+    bool CanHandle(string contentType); // from IContentTypeHandler
+    strinng Execute(string input);
 }
 
 public interface ITranslateAssetXmlOutputToContentType : IContentTypeHandler
@@ -127,7 +127,7 @@ const string expected =
 </Asset>";
             _subject = new TranslateHalJsonHalInputToAssetXml();
 
-            var actual = _subject.Execute(input).CreateNavigator().OuterXml;
+            var actual = _subject.Execute(input);
 
             Assert.AreEqual(expected, actual);
         }
@@ -178,7 +178,7 @@ const string expected =
 </Asset>";
             _subject = new TranslateHalYamlInputToAssetXml();
 
-            var actual = _subject.Execute(input).CreateNavigator().OuterXml;
+            var actual = _subject.Execute(input);
 
             Assert.AreEqual(expected, actual);
         }
