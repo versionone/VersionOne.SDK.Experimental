@@ -19,7 +19,7 @@ Here's what we'll do:
 *"What's possible? What is the simplest thing we could say in code, so that we'll be talking about something that's on the screen, instead of something that's ill-formed in our mind."*
 -- [Ward Cunningham](http://www.artima.com/intv/simplest3.html), inventor of Wiki technology and an original Agile Manifesto signatory.
 
-As an agile developer, you probably recognize that quote, or at least the sentiment. So, let's get started with the first task in programming with VersionOne.
+As an agile developer, you probably recognize that quote, or at least the sentiment. So, let's get started with the first task in programming with VersionOne. All browser examples are executed within Google Chrome, but should work in other browsers that jQuery supports as well.
 
 We're using the public VersionOne API Developer Playground server, but you can adapt these scripts to run against your own instance if you have one.
 
@@ -37,9 +37,26 @@ curl --basic -u admin:admin http://localhost/VersionOne.Web/rest-1.v1/Data/Membe
 
 ### jQuery Code
 
+TODO: jsFiddle link: http://jsfiddle.net/a5cAU/
 
+```javascript
+var serviceUrl = 'http://localhost/VersionOne.Web/rest-1.v1/Data/Member/20?acceptFormat=haljson';
+
+var credentials = { 'Authorization': 'Basic ' + btoa('admin:admin') };
+
+$.ajax({
+    url: serviceUrl,
+    headers: credentials
+}).done(function (data) {
+    console.log(data);
+    var userDetails = data.Name + " " + data.Nickname + " " + data.Email;
+    console.log(userDetails);
+});​
+```
 
 ### Output
+
+With cURL, you'll see the following JSON on the command line. Similarly, withing Google Chrome, the value of `data` will be visible in the JavaScript console by hitting `F12` to view the developer tools pane.
 
 ```json
 {
@@ -80,13 +97,9 @@ curl --basic -u admin:admin http://localhost/VersionOne.Web/rest-1.v1/Data/Membe
 
 ### Explanation
 
-The cURL tool supports lots of options for interacting with HTTP servers and APIs. We only needed to use the `--basic -u admin:admin` flags to pass the credentials to the server.
+The cURL tool supports lots of options for interacting with HTTP servers and APIs. We only needed to use the `--basic -u admin:admin` flags to pass the credentials to the server. See [cURL usage details here](http://curl.haxx.se/docs/manpage.html). And, see [jQuery's ajax method docs here](http://api.jquery.com/jQuery.ajax/).
 
 
-
-
-    </p>
-<p>    
 Well, suppose you want to write an app that lets you create stories everytime you think of one, or any time someone in your organization comes to you and says, "Hey you, Programmer-Automater-Ninja-Wizard-Guy-or-Gal, wouldn't it be great if As A User When ... I could ... So That ..." -- you could just whip off some command-line jujitsu and then say, "Your story is my command, and by the way, I already added it to the backlog in no time!"
     
     </p>
