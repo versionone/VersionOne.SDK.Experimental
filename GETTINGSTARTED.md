@@ -9,10 +9,11 @@ Here's what we'll do:
 
 1. Query the admin user's details and get the results as JSON, XML, or YAML using the cURL command line tool
 2. Query the admin user's details and get the results as JSON, XML, or YAML using the JavaScript jQuery library
-2. Create a new Project scope using HTML 5 and jQuery
-3. Add stories to the project using HTML 5 and jQuery
-4. View existing stories from the project using HTML 5 and jQuery
-5. See examples of doing similar tasks with Python, C#, and Java
+3. Create a new Project scope using cURL
+4. Create a new Project scope using jQuery
+5. Add stories to the project using HTML 5 and jQuery
+6. View existing stories from the project using HTML 5 and jQuery
+7. See examples of doing similar tasks with Python, C#, and Java
 
 # The simplest thing that could possibly work
 
@@ -99,6 +100,51 @@ With cURL, you'll see the following JSON on the command line. Similarly, withing
 
 The cURL tool supports lots of options for interacting with HTTP servers and APIs. We only needed to use the `--basic -u admin:admin` flags to pass the credentials to the server. See [cURL usage details here](http://curl.haxx.se/docs/manpage.html). And, see [jQuery's ajax method docs here](http://api.jquery.com/jQuery.ajax/).
 
+## Task 2: Create a new project scope
+
+Now that we know how to query the admin user, demonstrating simply querying, let's create a new Project scope asset with cURl first, then with jQuery.
+
+### cURL Code
+
+```batch
+curl --basic -u admin:admin ^
+-H Content-Type:haljson ^
+-X POST http://localhost/VersionOne.Web/rest-1.v1/Data/Scope?acceptFormat=haljson ^
+--data "{'Name':'New Project','BeginDate':'2012-12-16','_links':{'Parent':{'idref':'Scope:0'}}}"
+```
+
+### jQuery Code
+
+```javascript
+var serviceUrl = 'http://localhost/VersionOne.Web/rest-1.v1/Data/Scope?acceptFormat=haljson';
+
+var credentials = {
+    'Authorization': 'Basic ' + btoa('admin:admin')
+};
+
+var data = {
+    'Name': 'New Project',
+    'BeginDate': '2012-12-16',
+    _links: {
+        "Parent": {
+            idref: "Scope:0"
+        }
+    }
+};
+
+$.ajax({
+    url: serviceUrl,
+    headers: credentials,
+    type: 'POST',
+    contentType: "haljson",
+    data: JSON.stringify(data)
+}).done(function (data) {
+    console.log(data);
+    console.log(data._links.self.id);
+});​
+```
+
+# TODO: finish below in style of above
 
 Well, suppose you want to write an app that lets you create stories everytime you think of one, or any time someone in your organization comes to you and says, "Hey you, Programmer-Automater-Ninja-Wizard-Guy-or-Gal, wouldn't it be great if As A User When ... I could ... So That ..." -- you could just whip off some command-line jujitsu and then say, "Your story is my command, and by the way, I already added it to the backlog in no time!"
     
