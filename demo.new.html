@@ -1,0 +1,251 @@
+<!doctype html>
+ 
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>jQuery UI Tabs - Tabs at bottom</title>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+    <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
+    <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+    <script src="sh_main.min.js"></script>
+    <script src="sh_javascript.min.js"></script>
+    <script src="sh_sh.min.js"></script>
+    <script src="sh_xml.min.js"></script>    
+    <link rel="stylesheet" href="sh_style.css" />
+    <script>
+    $(function() {
+        $( ".tabs-bottom" ).tabs(); 
+        // fix the classes
+        $( ".tabs-bottom .ui-tabs-nav, .tabs-bottom .ui-tabs-nav > *" )
+            .removeClass( "ui-corner-all ui-corner-top" )
+            .addClass( "ui-corner-bottom" ); 
+        // move the nav to the bottom
+        $( ".tabs-bottom .ui-tabs-nav" ).appendTo( ".tabs-bottom" );
+
+        $( ".outs-bottom" ).tabs(); 
+        // fix the classes
+        $( ".outs-bottom .ui-tabs-nav, .tabs-bottom .ui-tabs-nav > *" )
+            .removeClass( "ui-corner-all ui-corner-top" )
+            .addClass( "ui-corner-bottom" ); 
+        // move the nav to the bottom
+        $( ".outs-bottom .ui-tabs-nav" ).appendTo( ".outs-bottom" );  
+
+        sh_highlightDocument();      
+    });
+    </script>
+    <style type="text/css">
+    body {
+      font-family: sans-serif;
+    }
+    pre {
+      padding: 8px;
+    }
+    /* force a height so the tabs don't jump as content height changes */
+    #tabs .tabs-spacer { float: left; height: 75px; }
+    .tabs-bottom .ui-tabs-nav { clear: left; padding: 0 .2em .2em .2em; }
+    .tabs-bottom .ui-tabs-nav li { top: auto; bottom: 0; margin: 0 .2em 1px 0; border-bottom: auto; border-top: 0; }
+    .tabs-bottom .ui-tabs-nav li.ui-tabs-active { margin-top: -1px; padding-top: 1px; }
+    </style>
+</head>
+<body>
+
+<h2>VersionOne Web API Quick Start</h2>
+
+<p>Getting started with the VersionOne Web API is easy.</p>
+
+<p>This article walks you through hands-on examples of creating a new project and adding stories to it with simple tools like cURL and JavaScript with the popular jQuery library.</p>
+
+<h2>Tasks we'll cover</h2>
+
+<p>Here's what we'll do:</p>
+
+<ol>
+  <li>Query the admin user's details and get the results as JSON, XML, or YAML using the cURL command line tool</li>
+  <li>Query the admin user's details and get the results as JSON, XML, or YAML using the JavaScript jQuery library</li>
+  <li>Create a new Project scope using cURL</li>
+  <li>Create a new Project scope using jQuery</li>
+  <li>Add stories to the project using HTML 5 and jQuery</li>
+  <li>View existing stories from the project using HTML 5 and jQuery</li>
+  <li>See examples of doing similar tasks with Python, C#, and Java</li>
+</ol>
+
+<h2>The simplest thing that could possibly work</h2>
+
+<p><i>"What's possible? What is the simplest thing we could say in code, so that we'll be talking about something that's on the screen, instead of something that's ill-formed in our mind."</i> -- <a href="http://www.artima.com/intv/simplest3.html">Ward Cunningham</a>, inventor of Wiki technology and an original Agile Manifesto signatory.</p>
+
+<p>As an agile developer, you probably recognize that quote, or at least the sentiment. So, let's get started with the first task in programming with VersionOne. All browser examples are executed within Google Chrome, but should work in other browsers that jQuery supports as well.</p>
+
+<p>We're using the public VersionOne API Developer Playground server, but you can adapt these scripts to run against your own instance if you have one.</p>
+ 
+<h2>Task 1: Query the admin user's details using cURL or jQuery</h2>
+
+<p>To get data out of the VersionOne Web API with the least number of lines of code possible, you can use the <a href="http://curl.haxx.se/">command-line tool cURL</a>. The same thing can be done, with more code, using JavaScript and the jQuery library, and the other languages shown in the tabs:
+
+<h3>Code</h3>
+
+<div id="tabs" class="tabs-bottom">
+    <ul>
+        <li><a href="#tabs-1">cURL</a></li>        
+        <li><a href="#tabs-2">JS jQuery</a></li>
+        <li><a href="#tabs-3">Python</a></li>
+        <li><a href="#tabs-4">C#</a></li>
+        <li><a href="#tabs-5">Java</a></li>
+    </ul>
+    <div class="tabs-spacer"></div>
+    <div id="tabs-1"><pre class="sh_sh"><xmp>curl --basic -u admin:admin http://localhost/VersionOne.Web/rest-1.v1/Data/Member/20?acceptFormat=haljson</xmp></pre>
+    </div>
+    <div id="tabs-2"><pre class="sh_javascript"><xmp>// TODO: jsFiddle link: http://jsfiddle.net/a5cAU/
+var serviceUrl = 'http://localhost/VersionOne.Web/rest-1.v1/Data/Member/20?acceptFormat=haljson';
+
+var credentials = { 'Authorization': 'Basic ' + btoa('admin:admin') };
+
+$.ajax({
+    url: serviceUrl,
+    headers: credentials
+}).done(function (data) {
+    console.log(data);
+    var userDetails = data.Name + " " + data.Nickname + " " + data.Email;
+    console.log(userDetails);
+});​</xmp></pre>      
+    </div>
+    <div id="tabs-3">
+      TODO
+    </div>
+    <div id="tabs-4">
+      TODO
+    </div>
+    <div id="tabs-5">
+      TODO
+    </div>
+</div> 
+ 
+</body>
+</html>
+ 
+<h3>Output</h3>
+
+<p>
+With cURL, you'll see the following JSON on the command line. Similarly, withing Google Chrome, the value of `data` will be visible in the JavaScript console by hitting `F12` to view the developer tools pane.
+</p>
+
+<div id="outs" class="outs-bottom">
+    <ul>
+        <li><a href="#out-1">JSON</a></li>        
+        <li><a href="#out-2">XML</a></li>
+    </ul>
+    <div class="tabs-spacer"></div>
+    <div id="out-1"><pre class="sh_javascript"><xmp>{
+  "SendConversationEmails": "true",
+  "AssetState": "64",
+  "Email": "admin@company.com",
+  "Nickname": "Admin",
+  "Followers.Nickname": "",
+  "SecurityScope.Name": "",
+  "NotifyViaEmail": "false",
+  "IsLoginDisabled": "false",
+  "Description": "",
+  "AssetType": "Member",
+  "Phone": "777-666-888-99",
+  "Followers.Name": "",
+  "DefaultRole.Name": "Role.Name'System Admin",
+  "Username": "admin",
+  "UsesLicense": "false",
+  "Ideas": "",
+  "Name": "J",
+  "_links": {
+    "self": {
+      "href": "/VersionOne.Web/rest-1.v1/Data/Member/20",
+      "id": "Member:20"
+    },
+    "DefaultRole": [
+      {
+        "href": "/VersionOne.Web/rest-1.v1/Data/Role/1",
+        "idref": "Role:1"
+      }
+    ],
+    "SecurityScope": [],
+    "Avatar": [],
+    "Followers": []
+  }
+}</xmp></pre>
+    </div>
+    <div id="out-2"><pre class="sh_xml"><xmp><?xml version="1.0" encoding="UTF-8"?>
+
+<Asset href="/VersionOne.Web/rest-1.v1/Data/Member/20" id="Member:20">
+  <Attribute name="Phone">777-666-888-99</Attribute>
+  <Attribute name="Followers.Nickname" />
+  <Relation name="Avatar" />
+  <Relation name="DefaultRole">
+    <Asset href="/VersionOne.Web/rest-1.v1/Data/Role/1" idref="Role:1" />
+  </Relation>
+  <Attribute name="Description" />
+  <Attribute name="Username">admin</Attribute>
+  <Attribute name="NotifyViaEmail">false</Attribute>
+  <Attribute name="AssetState">64</Attribute>
+  <Relation name="Followers" />
+  <Attribute name="Ideas" />
+  <Relation name="SecurityScope" />
+  <Attribute name="AssetType">Member</Attribute>
+  <Attribute name="IsLoginDisabled">false</Attribute>
+  <Attribute name="SendConversationEmails">true</Attribute>
+  <Attribute name="Followers.Name" />
+  <Attribute name="UsesLicense">false</Attribute>
+  <Attribute name="SecurityScope.Name" />
+  <Attribute name="Nickname">Admin</Attribute>
+  <Attribute name="Email">admin@company.com</Attribute>
+  <Attribute name="Name">J</Attribute>
+  <Attribute name="DefaultRole.Name">Role.Name'System Admin</Attribute>
+</Asset></xmp></pre>      
+    </div>
+</div>
+
+<h3>Explanation</h3>
+<p>
+The cURL tool supports lots of options for interacting with HTTP servers and APIs. We only needed to use the <code>--basic -u admin:admin</code> flags to pass the credentials to the server. See <a href="http://curl.haxx.se/docs/manpage.html">cURL usage details here</a>. And, see <a href="http://api.jquery.com/jQuery.ajax/">jQuery's ajax method docs here</a>.
+</p>
+
+<!--
+## Task 2: Create a new project scope
+
+Now that we know how to query the admin user, demonstrating simply querying, let's create a new Project scope asset with cURl first, then with jQuery.
+
+### cURL Code
+
+```batch
+curl --basic -u admin:admin ^
+-H Content-Type:haljson ^
+-X POST http://localhost/VersionOne.Web/rest-1.v1/Data/Scope?acceptFormat=haljson ^
+--data "{'Name':'New Project','BeginDate':'2012-12-16','_links':{'Parent':{'idref':'Scope:0'}}}"
+```
+
+### jQuery Code
+
+```javascript
+var serviceUrl = 'http://localhost/VersionOne.Web/rest-1.v1/Data/Scope?acceptFormat=haljson';
+
+var credentials = {
+    'Authorization': 'Basic ' + btoa('admin:admin')
+};
+
+var data = {
+    'Name': 'New Project',
+    'BeginDate': '2012-12-16',
+    _links: {
+        "Parent": {
+            idref: "Scope:0"
+        }
+    }
+};
+
+$.ajax({
+    url: serviceUrl,
+    headers: credentials,
+    type: 'POST',
+    contentType: "haljson",
+    data: JSON.stringify(data)
+}).done(function (data) {
+    console.log(data);
+    console.log(data._links.self.id);
+});​
+```
+-->
