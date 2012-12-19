@@ -93,6 +93,7 @@ namespace VersionOne.Web.Plugins.Api
 
         private static readonly string[] _contentTypes = new[]
             {
+                "haljson",
                 "hal+json",
                 "text/hal+json",
                 "application/hal+json"

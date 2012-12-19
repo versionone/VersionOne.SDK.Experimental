@@ -12,6 +12,7 @@ namespace VersionOne.Web.Plugins.Api
     {
         private static readonly string[] ContentTypes = new[]
         {
+            "haljson",
             "hal+json",
             "text/hal+json",
             "application/hal+json"
@@ -40,38 +41,77 @@ namespace VersionOne.Web.Plugins.Api
                 var doc = new XPathDocument(reader);
                 var nav = doc.CreateNavigator();
 
-                var rootObject = new JObject();
+                var assetList = AddAssets(nav);
+                if (assetList.Count > 0)
+                {
+                    return assetList.ToString();
+                } 
+                else 
+                {
+                    var rootObject = new JObject();
+                    var relations = new JObject();
 
-                AddAttributes(nav, rootObject);
-                AddRelationships(nav, rootObject);
+                    AddAttributes(nav, "//Attribute", rootObject);
+                    AddIdentityRelation(nav, "//Asset", relations);
+                    AddRelationships(nav, "//Relation", rootObject, relations);
 
-                return rootObject.ToString();
+                    return rootObject.ToString();
+                }
             }
         }
 
-        private static void AddAttributes(XPathNavigator nav, JObject rootObject)
+        // TODO: add tests
+        private static JArray AddAssets(XPathNavigator nav)
         {
-            var attributeNodes = nav.Select("//Attribute");
+            var assetList = new JArray();
+
+            var assetsNodes = nav.Select("//Assets");
+            var hasRootNode = assetsNodes.MoveNext();
+            if (!hasRootNode)
+            {
+                return assetList;
+            }
+            var nodeNav = assetsNodes.Current;
+            var assetNodes = nodeNav.SelectDescendants("Asset", string.Empty, false);
+            while(assetNodes.MoveNext())
+            {
+                var assetNode = assetNodes.Current;
+                var asset = new JObject();
+                var assetRelations = new JObject();
+                AddIdentityRelation(assetNode, ".", assetRelations);
+                AddAttributes(assetNode, "./Attribute", asset);
+                AddRelationships(assetNode, "./Relation", asset, assetRelations);
+                assetList.Add(asset);
+            }
+            
+            return assetList;
+        }
+
+        private static void AddAttributes(XPathNavigator nav, string selectPath, JObject propertyContainer)
+        {
+            var attributeNodes = nav.Select(selectPath);
             while (attributeNodes.MoveNext())
             {
                 var nodeNav = attributeNodes.Current;
                 var attrName = nodeNav.GetAttribute("name", string.Empty);
                 var attrValue = nodeNav.Value;
-                rootObject.Add(attrName, attrValue);
+                propertyContainer.Add(attrName, attrValue);
             }
         }
 
-        private static void AddRelationships(XPathNavigator nav, JObject rootObject)
+        private static void AddIdentityRelation(XPathNavigator nav, string selectPath, JObject relations)
         {
-            var relationNodes = nav.Select("//Relation");
-            var relations = new JObject();
-
             // Add the identity relation
-            var assetNode = nav.SelectSingleNode("//Asset");
+            var assetNode = nav.SelectSingleNode(selectPath);
             var href = assetNode.GetAttribute("href", string.Empty);
             var id = assetNode.GetAttribute("id", string.Empty);
             var self = new JObject { { "href", new JValue(href) }, { "id", new JValue(id) } };
             relations.Add("self", self);
+        }
+
+        private static void AddRelationships(XPathNavigator nav, string selectPath, JObject propertyContainer, JObject relations)
+        {
+            var relationNodes = nav.Select(selectPath);
 
             while (relationNodes.MoveNext())
             {
@@ -92,7 +132,7 @@ namespace VersionOne.Web.Plugins.Api
                 AddRelationItems(relatedAssets, relations, relationName);
             }
 
-            rootObject.Add("_links", relations);
+            propertyContainer.Add("_links", relations);
         }
 
         private static void AddRelationItems(JArray relatedAssets, JObject relations, string relationName)

@@ -11,16 +11,15 @@ namespace VersionOne.Web.Plugins.Api
 
         public void Init(HttpApplication context)
         {
-            context.BeginRequest += context_BeginRequest;
-        }
+            context.PreRequestHandlerExecute += (sender, args) =>
+            {
+                HttpContext.Current.Request.Filter =
+                    new ApiInputTranslatorFilter(HttpContext.Current.Request.Filter);
 
-        void context_BeginRequest(object sender, EventArgs e)
-        {
-            HttpContext.Current.Request.Filter =
-                new ApiInputTranslatorFilter(HttpContext.Current.Request.Filter);
-
-            HttpContext.Current.Response.Filter =
-                new ApiOutputTranslatorFilter(HttpContext.Current.Response.Filter);
+                HttpContext.Current.Response.Filter =
+                    new ApiOutputTranslatorFilter(
+                        HttpContext.Current.Response.Filter);
+            };
         }
     }
 }
