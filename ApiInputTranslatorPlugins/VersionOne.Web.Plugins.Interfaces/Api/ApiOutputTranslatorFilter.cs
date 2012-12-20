@@ -12,6 +12,7 @@ namespace VersionOne.Web.Plugins.Api
     {
         private readonly Stream _sink;
         private long _position;
+        private readonly StringBuilder _originalOutputBuffer = new StringBuilder();
 
         public ApiOutputTranslatorFilter(Stream sink)
         {
@@ -27,35 +28,49 @@ namespace VersionOne.Web.Plugins.Api
                 return;
             }
 
-            var originalContent = System.Text.UTF8Encoding.UTF8.
+            var originaOutputChunk = UTF8Encoding.UTF8.
                 GetString(buffer, offset, byteCountToWrite);
 
-            var translatedContent = translator.Execute(originalContent);
+            _originalOutputBuffer.Append(originaOutputChunk);
 
-            for (var i = 0; i < byteCountToWrite; i++)
-            {
-                buffer[i] = (byte)'\0';
-            }
+            //for (var i = 0; i < byteCountToWrite; i++)
+            //{
+            //    HttpResponse.Out[i] = (byte)'\0';
 
-            byteCountToWrite = translatedContent.Length;
-
-            var bytesToWrite = UTF8Encoding.UTF8.GetBytes(translatedContent);
-            _sink.Write(bytesToWrite, 0, byteCountToWrite);
+            //    var bytes = UTF8Encoding.UTF8.GetBytes(translatedContent);
+            //    _sink.Write(bytes, 0, byteCountToWrite);
+            //}
         }
+
+        private bool _hasAttemptedToGetTranslator;
+
+        private ITranslateAssetXmlOutputToContentType _translator;
 
         private ITranslateAssetXmlOutputToContentType GetOutputTranslatorByContentType()
         {
-            var acceptTypes = new List<string>(HttpContext.Current.Request.AcceptTypes);
-
-            var queryAcceptType = HttpContext.Current.Request.QueryString["AcceptFormat"];
-            if (!string.IsNullOrWhiteSpace(queryAcceptType))
+            if (_translator != null)
             {
-                acceptTypes.Add(queryAcceptType);
-                HttpContext.Current.Response.ContentType = queryAcceptType;
+                return _translator;
             }
 
-            return ApiTranslatorPluginsFactory.GetPluginForAcceptTypes
-                <ITranslateAssetXmlOutputToContentType>(acceptTypes);
+            if (!_hasAttemptedToGetTranslator)
+            {
+                var acceptTypes = new List<string>(HttpContext.Current.Request.AcceptTypes);
+
+                var queryAcceptType = HttpContext.Current.Request.QueryString["AcceptFormat"];
+                if (!string.IsNullOrWhiteSpace(queryAcceptType))
+                {
+                    acceptTypes.Add(queryAcceptType);
+                    HttpContext.Current.Response.ContentType = queryAcceptType;
+                }
+
+                _hasAttemptedToGetTranslator = true;
+                _translator = ApiTranslatorPluginsFactory.GetPluginForAcceptTypes
+                    <ITranslateAssetXmlOutputToContentType>(acceptTypes);
+                return _translator;
+            }
+
+            return null;
         }
 
         private void WriteToWrappedStream(byte[] buffer, int offset, int byteCountToRead)
@@ -82,7 +97,21 @@ namespace VersionOne.Web.Plugins.Api
 
         public override void Close()
         {
-            _sink.Close();
+            if (_translator != null)
+            {
+                var originalOutputXml = _originalOutputBuffer.ToString();
+
+                var translatedContent = _translator.Execute(originalOutputXml);
+                var byteCountToWrite = translatedContent.Length;
+
+                var bytes = UTF8Encoding.UTF8.GetBytes(translatedContent);
+                _sink.Write(bytes, 0, byteCountToWrite);
+                _sink.Close();
+            }
+            else
+            {
+                _sink.Close();
+            }
         }
 
         public override void Flush()
