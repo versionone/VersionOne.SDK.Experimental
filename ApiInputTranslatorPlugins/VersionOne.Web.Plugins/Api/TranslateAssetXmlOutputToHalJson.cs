@@ -72,7 +72,7 @@ namespace VersionOne.Web.Plugins.Api
                 return assetList;
             }
             var nodeNav = assetsNodes.Current;
-            var assetNodes = nodeNav.SelectDescendants("Asset", string.Empty, false);
+            var assetNodes = nodeNav.SelectChildren("Asset", string.Empty);
             while(assetNodes.MoveNext())
             {
                 var assetNode = assetNodes.Current;
