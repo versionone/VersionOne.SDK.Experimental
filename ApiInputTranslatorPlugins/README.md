@@ -1,6 +1,6 @@
 # Deployment
 
-Supposing the VersionOne `<install dir>` is `c:\inetpub\wwwroot\VersionOne`:
+Supposing your VersionOne install dir is `c:\inetpub\wwwroot\VersionOne`:
 
 * Copy `VersionOne.Web.Plugins.Interfaces\bin\Release\VersionOne.Web.Plugins.Interfaces.dll` into `<install dir>\bin`.
 * Create a folder `<install dir>\bin\Plugins`.
@@ -34,20 +34,22 @@ Access-Control-Allow-Origin = *
 Access-Control-Allow-Headers = Authorization, Content-Type
 ```
 
-To learn more about this, visit the [Enable CORS web site](http://enable-cors.org/). To quote it:
+To learn more about this, visit the [Enable CORS web site](http://enable-cors.org/). In summary:
 
-JavaScript and the web programming has grown by leaps and bounds over the years, but the same-origin policy still remains. This prevents JavaScript from making requests across domain boundaries, and has spawned various hacks for making cross-domain requests.
-
-CORS introduces a standard mechanism that can be used by all browsers for implementing cross-domain requests. The spec defines a set of headers that allow the browser and server to communicate about which requests are (and are not) allowed. CORS continues the spirit of the open web by bringing API access to all.
+> JavaScript and the web programming has grown by leaps and bounds over the years, but the same-origin policy still remains. This prevents JavaScript from making requests across domain boundaries, and has spawned various hacks for making cross-domain requests.
+>
+> CORS introduces a standard mechanism that can be used by all browsers for implementing cross-domain requests. The spec defines a set of headers that allow the browser and server to communicate about which requests are (and are not) allowed. CORS continues the spirit of the open web by bringing API access to all.
 
 # How to Test
 
-First you'll need to login to the instance to get past the authentication screen and have the cookie set. After that, a query like this will do:
+Given your VersionOne instance is installed at `htp://localhost/VersionOne.Web`:
 
-http://localhost/VersionOne.Web/rest-1.v1/Data/RequestPriority?acceptFormat=haljson
+* Visit the site and authenticate normally, so that the browser gets the authentication cookie from the server.
+* Next, visit `http://localhost/VersionOne.Web/rest-1.v1/Data/RequestPriority?acceptFormat=haljson`
 
-That will return data like this in JSON, conformant with HAL:
+That will return data like this in HAL-conformant JSON result:
 
+```json
 [
   {
     "Name": "Low",
@@ -89,4 +91,4 @@ That will return data like this in JSON, conformant with HAL:
     }
   }
 ]
-
+```
