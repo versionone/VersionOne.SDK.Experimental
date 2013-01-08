@@ -1,17 +1,19 @@
-Steps to Deploy :
+# Deployment
 
-1. Copy the interfaces DLL to the bin\ folder.
+Supposing the VersionOne `<install dir>` is `c:\inetpub\wwwroot\VersionOne`:
 
-2. Copy and paste the Plugins folder into bin\ so that there is now a bin\Plugins folder containing the same files.
+1. Copy `VersionOne.Web.Plugins.Interfaces\bin\Release\VersionOne.Web.Plugins.Interfaces.dll` into `<install dir>\bin`.
+2. Create a folder `<install dir>\bin\Plugins`.
+3. Copy all DLLs except the interfaces DLL from `VersionOne.Web.Plugins\bin\Release\` into the `Plugins` folder.
+4. Add this line to `Web.config` in the `<httpModules>` element after the `ErrorLog` module:
 
-3. This line must be added to Web.config:
+```xml
+<add name="ApiTranslatorFilterModule" type="VersionOne.Web.Plugins.Api.ApiTranslatorFilterModule, VersionOne.Web.Plugins.Interfaces" />     
+```
 
-      <add name="ApiTranslatorFilterModule" type="VersionOne.Web.Plugins.Api.ApiTranslatorFilterModule, VersionOne.Web.Plugins.Interfaces" />     
+In context, it should then look something like this:
 
-Add it after Elmah, like this:
-
-
-...
+```
         <add namespace="VersionOne.Web.Models" />
       </namespaces>
     </pages>
@@ -22,9 +24,9 @@ Add it after Elmah, like this:
     </httpModules>
     <httpHandlers>
       <add verb="GET" path="assetdetail.v1" type="VersionOne.Web.Tools.AssetDetailHandler,VersionOne.Web" />
-...
+```
 
-4. In IIS, for the specific app/virtual directory, select "HTTP Response Headers", and add these:
+6. In IIS, for the specific app/virtual directory, select "HTTP Response Headers", and add these:
 
 Access-Control-Allow-Methods = GET, PUT, POST, DELETE, OPTIONS
 Access-Control-Allow-Origin = *
